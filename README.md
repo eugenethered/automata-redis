@@ -1,2 +1,2 @@
-# automata-redis-timeseries
-Automata Redis Time Series
+# automata-redis
+Automata Redis both for conventional key-value & timeseries data.
