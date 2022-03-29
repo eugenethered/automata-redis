@@ -1,2 +1,2 @@
-# redis-timeseries
-Redis Time Series
+# automata-redis-timeseries
+Automata Redis Time Series
