@@ -13,6 +13,10 @@ class RedisCacheProviderTestCase(unittest.TestCase):
             'REDIS_SERVER_PORT': 6379
         }
 
+    def tearDown(self):
+        cache_provider = RedisCacheProvider(self.options)
+        cache_provider.delete('timeseries-test')
+
     def test_should_set_server_options(self):
         cache_provider = RedisCacheProvider(self.options, auto_connect=False)
         self.assertEqual(cache_provider.server_address, '192.168.1.90')
@@ -55,6 +59,16 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         cache_provider.store('test-big-float', BigFloat('1000000000.123456789012'))
         value = cache_provider.fetch('test-big-float', as_type=BigFloat)
         self.assertEqual(str(value), '1000000000.123456789012')
+
+    def test_should_store_time_series(self):
+        cache_provider = RedisCacheProvider(self.options)
+        cache_provider.create_timeseries('timeseries-test', 'price')
+        cache_provider.add_to_timeseries('timeseries-test', 1, 10.00)
+        cache_provider.add_to_timeseries('timeseries-test', 2, 11.00)
+        cache_provider.add_to_timeseries('timeseries-test', 3, 12.00)
+        timeseries_data = cache_provider.get_timeseries_data('timeseries-test', time_from=1, time_to=3)
+        expected = [(1, 10.0), (2, 11.0), (3, 12.0)]
+        self.assertEqual(expected, timeseries_data)
 
 
 if __name__ == '__main__':
