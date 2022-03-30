@@ -1,5 +1,6 @@
 import unittest
-from decimal import Decimal
+
+from core.number.BigFloat import BigFloat
 
 from provider.RedisCacheProvider import RedisCacheProvider
 
@@ -51,10 +52,9 @@ class RedisCacheProviderTestCase(unittest.TestCase):
 
     def test_should_store_key_large_precision_float_value(self):
         cache_provider = RedisCacheProvider(self.options)
-        cache_provider.store('test-large-float', Decimal(1000000000.123456789012))
-        value = cache_provider.fetch('test-large-float', as_type=Decimal)
-        self.assertAlmostEqual(value, 1000000000.123456789012, places=12)
-        self.fail('Large precision fails (rounding + significant places)!')
+        cache_provider.store('test-big-float', BigFloat('1000000000.123456789012'))
+        value = cache_provider.fetch('test-big-float', as_type=BigFloat)
+        self.assertEqual(str(value), '1000000000.123456789012')
 
 
 if __name__ == '__main__':

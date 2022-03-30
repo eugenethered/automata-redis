@@ -1,7 +1,7 @@
-from decimal import Decimal
 from typing import TypeVar
 
 import redis
+from core.number.BigFloat import BigFloat
 
 T = TypeVar("T")
 
@@ -21,7 +21,7 @@ class RedisCacheProvider:
             return False
 
     def store(self, key, value):
-        if type(value) is Decimal:
+        if type(value) is BigFloat:
             self.redis_client.set(key, str(value))
         else:
             self.redis_client.set(key, value)
@@ -32,7 +32,7 @@ class RedisCacheProvider:
             return int(value)
         if as_type is float:
             return float(value)
-        if as_type is Decimal:
-            return Decimal(value)
+        if as_type is BigFloat:
+            return BigFloat(value)
         else:
             return value
