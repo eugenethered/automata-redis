@@ -15,7 +15,8 @@ class RedisCacheProviderTestCase(unittest.TestCase):
 
     def tearDown(self):
         cache_provider = RedisCacheProvider(self.options)
-        cache_provider.delete('timeseries-test')
+        cache_provider.delete_timeseries('timeseries-test')
+        cache_provider.delete_timeseries('timeseries-big-float-test', double_precision=True)
 
     def test_should_set_server_options(self):
         cache_provider = RedisCacheProvider(self.options, auto_connect=False)
@@ -87,6 +88,15 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         cache_provider.delete_timeseries('timeseries-test')
         result = cache_provider.does_timeseries_exist('timeseries-test')
         self.assertFalse(result, 'Timeseries should not exist')
+
+    def test_should_store_time_series_with_big_floats(self):
+        cache_provider = RedisCacheProvider(self.options)
+        cache_provider.create_timeseries('timeseries-big-float-test', 'price', double_precision=True)
+        cache_provider.add_to_timeseries('timeseries-big-float-test', 1, BigFloat('1000000000.123456789012'))
+        cache_provider.add_to_timeseries('timeseries-big-float-test', 2, BigFloat('2000000000.210987654321'))
+        timeseries_data = cache_provider.get_timeseries_data('timeseries-big-float-test', time_from=1, time_to=2, double_precision=True)
+        expected = [(1, BigFloat('1000000000.123456789012')), (2, BigFloat('2000000000.210987654321'))]
+        self.assertEqual(expected, timeseries_data)
 
 
 if __name__ == '__main__':
