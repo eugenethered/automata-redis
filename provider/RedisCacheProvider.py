@@ -42,11 +42,22 @@ class RedisCacheProvider:
     def delete(self, key):
         self.redis_client.delete(key)
 
-    def create_timeseries(self, timeseries_reference, field_name):
-        self.redis_timeseries.create(timeseries_reference, labels={'time': field_name})
+    def create_timeseries(self, timeseries_key, field_name):
+        if not self.does_timeseries_exist(timeseries_key):
+            self.redis_timeseries.create(timeseries_key, labels={'time': field_name})
 
-    def add_to_timeseries(self, timeseries_reference, time, value):
-        self.redis_timeseries.add(timeseries_reference, time, value)
+    def add_to_timeseries(self, timeseries_key, time, value):
+        self.redis_timeseries.add(timeseries_key, time, value)
 
-    def get_timeseries_data(self, timeseries_reference, time_from, time_to):
-        return self.redis_timeseries.range(timeseries_reference, time_from, time_to)
+    def get_timeseries_data(self, timeseries_key, time_from, time_to):
+        return self.redis_timeseries.range(timeseries_key, time_from, time_to)
+
+    def does_timeseries_exist(self, timeseries_key):
+        try:
+            self.redis_timeseries.info(timeseries_key)
+            return True
+        except redis.exceptions.ResponseError:
+            return False
+
+    def delete_timeseries(self, timeseries_key):
+        self.delete(timeseries_key)

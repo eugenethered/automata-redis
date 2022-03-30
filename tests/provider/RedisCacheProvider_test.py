@@ -70,6 +70,24 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         expected = [(1, 10.0), (2, 11.0), (3, 12.0)]
         self.assertEqual(expected, timeseries_data)
 
+    def test_should_not_fail_when_attempting_to_create_timeseries_multiple_times(self):
+        cache_provider = RedisCacheProvider(self.options)
+        cache_provider.create_timeseries('timeseries-test', 'price')
+        result = cache_provider.does_timeseries_exist('timeseries-test')
+        self.assertTrue(result, 'Timeseries should be created')
+        cache_provider.create_timeseries('timeseries-test', 'price')
+        cache_provider.create_timeseries('timeseries-test', 'price')
+        self.assertTrue(result, 'Timeseries should already have been created')
+
+    def test_should_delete_timeseries(self):
+        cache_provider = RedisCacheProvider(self.options)
+        cache_provider.create_timeseries('timeseries-test', 'price')
+        result = cache_provider.does_timeseries_exist('timeseries-test')
+        self.assertTrue(result, 'Timeseries should be created')
+        cache_provider.delete_timeseries('timeseries-test')
+        result = cache_provider.does_timeseries_exist('timeseries-test')
+        self.assertFalse(result, 'Timeseries should not exist')
+
 
 if __name__ == '__main__':
     unittest.main()
