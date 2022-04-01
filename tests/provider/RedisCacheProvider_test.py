@@ -1,5 +1,7 @@
 import unittest
+from datetime import datetime
 
+from core.instant.RunInstantHolder import RunInstantHolder
 from core.number.BigFloat import BigFloat
 
 from provider.RedisCacheProvider import RedisCacheProvider
@@ -111,6 +113,22 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         cache_provider.add_to_timeseries('timeseries-big-float-test', 2, BigFloat('2000000000.010987654321'))
         timeseries_data = cache_provider.get_timeseries_data('timeseries-big-float-test', time_from=1, time_to=2, double_precision=True)
         expected = [(1, BigFloat('1000000000.000000000012')), (2, BigFloat('2000000000.010987654321'))]
+        self.assertEqual(expected, timeseries_data)
+
+    def test_should_store_time_series_with_mixed_big_floats_to_millisecond_times(self):
+        cache_provider = RedisCacheProvider(self.options)
+        cache_provider.create_timeseries('timeseries-big-float-test', 'price', double_precision=True)
+
+        RunInstantHolder.initialize(datetime.fromisoformat('2021-04-01T21:16:25.919601+00:00'))
+        time_interval_1 = RunInstantHolder.numeric_run_instance('')
+        cache_provider.add_to_timeseries('timeseries-big-float-test', time_interval_1, BigFloat('1000000000.123456789012'))
+
+        RunInstantHolder.initialize(datetime.fromisoformat('2021-04-01T21:16:25.919605+00:00'))
+        time_interval_2 = RunInstantHolder.numeric_run_instance('')
+        cache_provider.add_to_timeseries('timeseries-big-float-test', time_interval_2, BigFloat('1000000000.000000000012'))
+
+        timeseries_data = cache_provider.get_timeseries_data('timeseries-big-float-test', time_from=time_interval_1, time_to=time_interval_2, double_precision=True)
+        expected = [(1617311785919601, BigFloat('1000000000.123456789012')), (1617311785919605, BigFloat('1000000000.000000000012'))]
         self.assertEqual(expected, timeseries_data)
 
 
