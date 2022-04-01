@@ -46,6 +46,10 @@ class RedisCacheProvider:
     def fraction_key(key):
         return f'{key}:fraction'
 
+    @staticmethod
+    def fraction_leading_zeros_key(key):
+        return f'{key}:fraction:leading-zeros'
+
     def __create_timeseries(self, key, field_name):
         if not self.does_timeseries_exist(key):
             self.redis_timeseries.create(key, labels={'time': field_name})
@@ -54,11 +58,13 @@ class RedisCacheProvider:
         self.__create_timeseries(key, field_name)
         if double_precision:
             self.__create_timeseries(self.fraction_key(key), field_name)
+            self.__create_timeseries(self.fraction_leading_zeros_key(key), field_name)
 
     def add_to_timeseries(self, key, time, value):
         if type(value) is BigFloat:
             self.redis_timeseries.add(key, time, value.number)
             self.redis_timeseries.add(self.fraction_key(key), time, value.fraction)
+            self.redis_timeseries.add(self.fraction_leading_zeros_key(key), time, value.fraction_leading_zeros)
         else:
             self.redis_timeseries.add(key, time, value)
 
@@ -66,7 +72,8 @@ class RedisCacheProvider:
         if double_precision:
             number_values = self.redis_timeseries.range(key, time_from, time_to)
             fraction_values = self.redis_timeseries.range(self.fraction_key(key), time_from, time_to)
-            return [(n1, BigFloat(f'{int(v1)}.{int(v2)}')) for (n1, v1), (f2, v2) in zip(number_values, fraction_values) if n1 == f2]
+            fraction_leading_zero_values = self.redis_timeseries.range(self.fraction_leading_zeros_key(key), time_from, time_to)
+            return [(n1, BigFloat(int(v1), int(v2), int(v3))) for (n1, v1), (f2, v2), (l3, v3) in zip(number_values, fraction_values, fraction_leading_zero_values) if n1 == f2 and n1 == l3]
         else:
             return self.redis_timeseries.range(key, time_from, time_to)
 
@@ -81,4 +88,5 @@ class RedisCacheProvider:
         self.delete(key)
         if double_precision:
             self.delete(self.fraction_key(key))
+            self.delete(self.fraction_leading_zeros_key(key))
 

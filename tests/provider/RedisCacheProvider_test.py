@@ -104,6 +104,15 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         expected = [(1, BigFloat('1000000000.123456789012')), (2, BigFloat('2000000000.210987654321'))]
         self.assertEqual(expected, timeseries_data)
 
+    def test_should_store_time_series_with_big_floats_having_leading_zeros(self):
+        cache_provider = RedisCacheProvider(self.options)
+        cache_provider.create_timeseries('timeseries-big-float-test', 'price', double_precision=True)
+        cache_provider.add_to_timeseries('timeseries-big-float-test', 1, BigFloat('1000000000.000000000012'))
+        cache_provider.add_to_timeseries('timeseries-big-float-test', 2, BigFloat('2000000000.010987654321'))
+        timeseries_data = cache_provider.get_timeseries_data('timeseries-big-float-test', time_from=1, time_to=2, double_precision=True)
+        expected = [(1, BigFloat('1000000000.000000000012')), (2, BigFloat('2000000000.010987654321'))]
+        self.assertEqual(expected, timeseries_data)
+
 
 if __name__ == '__main__':
     unittest.main()
