@@ -61,6 +61,12 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         value = cache_provider.fetch('test-big-float', as_type=BigFloat)
         self.assertEqual(str(value), '1000000000.123456789012')
 
+    def test_should_store_key_large_precision_float_with_fraction_leading_zeros_value(self):
+        cache_provider = RedisCacheProvider(self.options)
+        cache_provider.store('test-big-float', BigFloat('1000000000.000000000012'))
+        value = cache_provider.fetch('test-big-float', as_type=BigFloat)
+        self.assertEqual(str(value), '1000000000.000000000012')
+
     def test_should_store_time_series(self):
         cache_provider = RedisCacheProvider(self.options)
         cache_provider.create_timeseries('timeseries-test', 'price')
