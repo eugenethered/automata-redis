@@ -131,6 +131,19 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         expected = [(1617311785919601, BigFloat('1000000000.123456789012')), (1617311785919605, BigFloat('1000000000.000000000012'))]
         self.assertEqual(expected, timeseries_data)
 
+    def test_should_store_json_data(self):
+        config = {
+            'name': 'Eugene',
+            'last': 'The Red',
+            'address': {
+                'place': 'on my island'
+            }
+        }
+        cache_provider = RedisCacheProvider(self.options)
+        cache_provider.store('test-config', config)
+        value = cache_provider.fetch('test-config', as_type=dict)
+        self.assertEqual(config, value)
+
 
 if __name__ == '__main__':
     unittest.main()

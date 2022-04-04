@@ -3,6 +3,7 @@ from typing import TypeVar
 import redis
 from core.number.BigFloat import BigFloat
 from redistimeseries.client import Client
+from utility.json_utility import as_pretty_json, as_json
 
 T = TypeVar("T")
 
@@ -25,6 +26,9 @@ class RedisCacheProvider:
     def store(self, key, value):
         if type(value) is BigFloat:
             self.redis_client.set(key, str(value))
+        elif type(value) is dict:
+            serialized_json = as_pretty_json(value, indent=None)
+            self.redis_client.set(key, serialized_json)
         else:
             self.redis_client.set(key, value)
 
@@ -32,10 +36,12 @@ class RedisCacheProvider:
         value = self.redis_client.get(key)
         if as_type is int:
             return int(value)
-        if as_type is float:
+        elif as_type is float:
             return float(value)
-        if as_type is BigFloat:
+        elif as_type is BigFloat:
             return BigFloat(value)
+        elif as_type is dict:
+            return as_json(value)
         else:
             return value
 
