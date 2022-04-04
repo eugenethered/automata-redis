@@ -4,7 +4,7 @@ from datetime import datetime
 from core.instant.RunInstantHolder import RunInstantHolder
 from core.number.BigFloat import BigFloat
 
-from provider.RedisCacheProvider import RedisCacheProvider
+from cache.provider.RedisCacheProvider import RedisCacheProvider
 
 
 class RedisCacheProviderTestCase(unittest.TestCase):
