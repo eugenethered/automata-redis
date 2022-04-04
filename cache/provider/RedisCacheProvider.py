@@ -34,11 +34,11 @@ class RedisCacheProvider:
     def fetch(self, key, as_type: T = str):
         value = self.redis_client.get(key)
         if as_type is int:
-            return int(value)
+            return None if value is None else int(value)
         elif as_type is float:
-            return float(value)
+            return None if value is None else float(value)
         elif as_type is BigFloat:
-            return BigFloat(value)
+            return None if value is None else BigFloat(value)
         elif as_type is dict:
             return as_json(value)
         else:

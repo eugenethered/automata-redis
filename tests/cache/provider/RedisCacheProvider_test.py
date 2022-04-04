@@ -144,6 +144,14 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         value = cache_provider.fetch('test-config', as_type=dict)
         self.assertEqual(config, value)
 
+    def test_should_fetch_relative_none_results_when_key_has_not_been_created(self):
+        cache_provider = RedisCacheProvider(self.options)
+        self.assertEqual(cache_provider.fetch('unknown-key'), None, 'string should be None')
+        self.assertEqual(cache_provider.fetch('unknown-key', int), None, 'int should be None')
+        self.assertEqual(cache_provider.fetch('unknown-key', float), None, 'float should be None')
+        self.assertEqual(cache_provider.fetch('unknown-key', BigFloat), None, 'BigFloat should be None')
+        self.assertEqual(cache_provider.fetch('unknown-key', dict), [], 'dict (json) should be None')
+
 
 if __name__ == '__main__':
     unittest.main()
