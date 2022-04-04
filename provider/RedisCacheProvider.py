@@ -2,7 +2,6 @@ from typing import TypeVar
 
 import redis
 from core.number.BigFloat import BigFloat
-from redistimeseries.client import Client
 from utility.json_utility import as_pretty_json, as_json
 
 T = TypeVar("T")
@@ -15,7 +14,7 @@ class RedisCacheProvider:
         self.server_port = options['REDIS_SERVER_PORT']
         if auto_connect:
             self.redis_client = redis.Redis(host=self.server_address, port=self.server_port, decode_responses=True)
-            self.redis_timeseries = Client(self.redis_client)
+            self.redis_timeseries = self.redis_client.ts()
 
     def can_connect(self):
         try:
