@@ -27,7 +27,7 @@ class RedisCacheProvider:
     def store(self, key, value):
         if type(value) is BigFloat:
             self.redis_client.set(key, str(value))
-        elif type(value) is dict:
+        elif type(value) is list or type(value) is dict:
             serialized_json = as_pretty_json(value, indent=None)
             self.redis_client.set(key, serialized_json)
         else:
@@ -41,7 +41,7 @@ class RedisCacheProvider:
             return None if value is None else float(value)
         elif as_type is BigFloat:
             return None if value is None else BigFloat(value)
-        elif as_type is dict:
+        elif as_type is dict or as_type is list:
             return as_json(value)
         else:
             return value

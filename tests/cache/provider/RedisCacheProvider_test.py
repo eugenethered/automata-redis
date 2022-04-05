@@ -144,6 +144,19 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         value = cache_provider.fetch('test-config', as_type=dict)
         self.assertEqual(config, value)
 
+    def test_should_store_multiples_of_json_data(self):
+        config = [{
+            'name': 'Eugene',
+            'last': 'The Red',
+            'address': {
+                'place': 'on my island'
+            }
+        }]
+        cache_provider = RedisCacheProvider(self.options)
+        cache_provider.store('test-multi-config', config)
+        value = cache_provider.fetch('test-multi-config', as_type=dict)
+        self.assertEqual(config, value)
+
     def test_should_fetch_relative_none_results_when_key_has_not_been_created(self):
         cache_provider = RedisCacheProvider(self.options)
         self.assertEqual(cache_provider.fetch('unknown-key'), None, 'string should be None')
