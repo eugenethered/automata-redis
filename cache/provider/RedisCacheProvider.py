@@ -1,3 +1,4 @@
+import logging
 from typing import TypeVar
 
 import redis
@@ -13,6 +14,7 @@ class RedisCacheProvider:
         self.server_address = options['REDIS_SERVER_ADDRESS']
         self.server_port = options['REDIS_SERVER_PORT']
         if auto_connect:
+            logging.info(f'Connecting to REDIS server {self.server_address}:{self.server_port}')
             self.redis_client = redis.Redis(host=self.server_address, port=self.server_port, decode_responses=True)
             self.redis_timeseries = self.redis_client.ts()
 
