@@ -41,8 +41,8 @@ class RedisCacheProviderTestCase(unittest.TestCase):
 
     def test_should_store_key_string_value(self):
         cache_provider = RedisCacheProvider(self.options)
-        cache_provider.store('foo', 'bar')
-        value = cache_provider.fetch('foo')
+        cache_provider.store('test-foo', 'bar')
+        value = cache_provider.fetch('test-foo')
         self.assertEqual(value, 'bar')
 
     def test_should_store_key_integer_value(self):
