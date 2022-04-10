@@ -165,6 +165,16 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         self.assertEqual(cache_provider.fetch('unknown-key', BigFloat), None, 'BigFloat should be None')
         self.assertEqual(cache_provider.fetch('unknown-key', dict), [], 'dict (json) should be None')
 
+    def test_should_fetch_key_names(self):
+        cache_provider = RedisCacheProvider(self.options)
+        keys = cache_provider.get_keys()
+        self.assertGreater(len(keys), 0)
+
+    def test_should_fetch_key_names_matching_pattern(self):
+        cache_provider = RedisCacheProvider(self.options)
+        keys = cache_provider.get_keys('test-*')
+        self.assertGreater(len(keys), 0)
+
 
 if __name__ == '__main__':
     unittest.main()

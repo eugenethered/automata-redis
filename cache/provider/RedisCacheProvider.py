@@ -24,6 +24,9 @@ class RedisCacheProvider:
         except redis.exceptions.ConnectionError:
             return False
 
+    def get_keys(self, pattern='*'):
+        return self.redis_client.keys(pattern)
+
     def store(self, key, value):
         if type(value) is BigFloat:
             self.redis_client.set(key, str(value))
