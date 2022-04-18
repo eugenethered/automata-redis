@@ -5,5 +5,4 @@ both for conventional key-value & timeseries data.
 `python3 -m build`
 
 ## Dependencies (IDE Terminal)
-`pip install persuader-technology-automata-core`
-`pip install persuader-technology-automata-utilities`
+`pip install redis persuader-technology-automata-core persuader-technology-automata-utilities`
