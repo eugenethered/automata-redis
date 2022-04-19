@@ -5,6 +5,8 @@ import redis
 from core.number.BigFloat import BigFloat
 from utility.json_utility import as_pretty_json, as_json
 
+from cache.constants.CacheConstants import NOT_AVAILABLE
+
 T = TypeVar("T")
 
 
@@ -38,6 +40,8 @@ class RedisCacheProvider:
 
     def fetch(self, key, as_type: T = str):
         value = self.redis_client.get(key)
+        if value is not None and value == NOT_AVAILABLE:
+            return NOT_AVAILABLE
         if as_type is int:
             return None if value is None else int(value)
         elif as_type is float:

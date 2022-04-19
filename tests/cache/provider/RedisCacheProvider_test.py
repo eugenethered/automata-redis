@@ -4,6 +4,7 @@ from datetime import datetime
 from core.instant.RunInstantHolder import RunInstantHolder
 from core.number.BigFloat import BigFloat
 
+from cache.constants.CacheConstants import NOT_AVAILABLE
 from cache.provider.RedisCacheProvider import RedisCacheProvider
 
 
@@ -56,6 +57,12 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         cache_provider.store('test-float', 100.12)
         value = cache_provider.fetch('test-float', as_type=float)
         self.assertEqual(value, 100.12)
+
+    def test_should_store_unavailable_simple_float_value(self):
+        cache_provider = RedisCacheProvider(self.options)
+        cache_provider.store('test-na-float', NOT_AVAILABLE)
+        value = cache_provider.fetch('test-na-float', as_type=float)
+        self.assertEqual(value, NOT_AVAILABLE)
 
     def test_should_store_key_large_precision_float_value(self):
         cache_provider = RedisCacheProvider(self.options)
