@@ -2,10 +2,9 @@ import logging
 from typing import TypeVar
 
 import redis
+from core.constants.not_available import NOT_AVAILABLE
 from core.number.BigFloat import BigFloat
 from utility.json_utility import as_pretty_json, as_json
-
-from cache.constants.CacheConstants import NOT_AVAILABLE
 
 T = TypeVar("T")
 

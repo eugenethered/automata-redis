@@ -1,10 +1,10 @@
 import unittest
 from datetime import datetime
 
+from core.constants.not_available import NOT_AVAILABLE
 from core.instant.RunInstantHolder import RunInstantHolder
 from core.number.BigFloat import BigFloat
 
-from cache.constants.CacheConstants import NOT_AVAILABLE
 from cache.provider.RedisCacheProvider import RedisCacheProvider
 
 
