@@ -4,20 +4,36 @@ from typing import TypeVar
 import redis
 from core.constants.not_available import NOT_AVAILABLE
 from core.number.BigFloat import BigFloat
+from core.options.exception.MissingOptionError import MissingOptionError
 from utility.json_utility import as_pretty_json, as_json
 
 T = TypeVar("T")
+
+REDIS_SERVER_ADDRESS = 'REDIS_SERVER_ADDRESS'
+REDIS_SERVER_PORT = 'REDIS_SERVER_PORT'
 
 
 class RedisCacheProvider:
 
     def __init__(self, options, auto_connect=True):
-        self.server_address = options['REDIS_SERVER_ADDRESS']
-        self.server_port = options['REDIS_SERVER_PORT']
-        if auto_connect:
+        self.options = options
+        self.auto_connect = auto_connect
+        self.__check_options()
+        if self.auto_connect:
+            self.server_address = options[REDIS_SERVER_ADDRESS]
+            self.server_port = options[REDIS_SERVER_PORT]
             logging.info(f'Connecting to REDIS server {self.server_address}:{self.server_port}')
             self.redis_client = redis.Redis(host=self.server_address, port=self.server_port, decode_responses=True)
             self.redis_timeseries = self.redis_client.ts()
+
+    def __check_options(self):
+        if self.options is None:
+            raise MissingOptionError(f'missing option please provide options {REDIS_SERVER_ADDRESS} and {REDIS_SERVER_PORT}')
+        if self.auto_connect is True:
+            if REDIS_SERVER_ADDRESS not in self.options:
+                raise MissingOptionError(f'missing option please provide option {REDIS_SERVER_ADDRESS}')
+            if REDIS_SERVER_PORT not in self.options:
+                raise MissingOptionError(f'missing option please provide option {REDIS_SERVER_PORT}')
 
     def can_connect(self):
         try:

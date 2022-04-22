@@ -21,11 +21,6 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         cache_provider.delete_timeseries('timeseries-test')
         cache_provider.delete_timeseries('timeseries-big-float-test', double_precision=True)
 
-    def test_should_set_server_options(self):
-        cache_provider = RedisCacheProvider(self.options, auto_connect=False)
-        self.assertEqual(cache_provider.server_address, '192.168.1.90')
-        self.assertEqual(cache_provider.server_port, 6379)
-
     def test_should_connect_to_redis_server(self):
         cache_provider = RedisCacheProvider(self.options)
         connected = cache_provider.can_connect()
