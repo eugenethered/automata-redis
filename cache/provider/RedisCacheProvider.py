@@ -97,14 +97,23 @@ class RedisCacheProvider:
         else:
             self.redis_timeseries.add(key, time, value)
 
-    def get_timeseries_data(self, key, time_from, time_to, double_precision=False):
+    def get_timeseries_data(self, key, time_from, time_to, double_precision=False, reverse_direction=False):
         if double_precision:
-            number_values = self.redis_timeseries.range(key, time_from, time_to)
-            fraction_values = self.redis_timeseries.range(self.fraction_key(key), time_from, time_to)
-            fraction_leading_zero_values = self.redis_timeseries.range(self.fraction_leading_zeros_key(key), time_from, time_to)
-            return [(n1, BigFloat(int(v1), int(v2), int(v3))) for (n1, v1), (f2, v2), (l3, v3) in zip(number_values, fraction_values, fraction_leading_zero_values) if n1 == f2 and n1 == l3]
+            if reverse_direction is False:
+                number_values = self.redis_timeseries.range(key, time_from, time_to)
+                fraction_values = self.redis_timeseries.range(self.fraction_key(key), time_from, time_to)
+                fraction_leading_zero_values = self.redis_timeseries.range(self.fraction_leading_zeros_key(key), time_from, time_to)
+                return [(n1, BigFloat(int(v1), int(v2), int(v3))) for (n1, v1), (f2, v2), (l3, v3) in zip(number_values, fraction_values, fraction_leading_zero_values) if n1 == f2 and n1 == l3]
+            else:
+                number_values = self.redis_timeseries.revrange(key, time_from, time_to)
+                fraction_values = self.redis_timeseries.revrange(self.fraction_key(key), time_from, time_to)
+                fraction_leading_zero_values = self.redis_timeseries.revrange(self.fraction_leading_zeros_key(key), time_from, time_to)
+                return [(n1, BigFloat(int(v1), int(v2), int(v3))) for (n1, v1), (f2, v2), (l3, v3) in zip(number_values, fraction_values, fraction_leading_zero_values) if n1 == f2 and n1 == l3]
         else:
-            return self.redis_timeseries.range(key, time_from, time_to)
+            if reverse_direction is False:
+                return self.redis_timeseries.range(key, time_from, time_to)
+            else:
+                return self.redis_timeseries.revrange(key, time_from, time_to)
 
     def does_timeseries_exist(self, timeseries_key):
         try:

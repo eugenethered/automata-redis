@@ -87,6 +87,16 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         expected = [(1, 10.0), (2, 11.0), (3, 12.0)]
         self.assertEqual(expected, timeseries_data)
 
+    def test_should_obtain_time_series_in_reverse_direction(self):
+        cache_provider = RedisCacheProvider(self.options)
+        cache_provider.create_timeseries('timeseries-test', 'price')
+        cache_provider.add_to_timeseries('timeseries-test', 1, 10.00)
+        cache_provider.add_to_timeseries('timeseries-test', 2, 11.00)
+        cache_provider.add_to_timeseries('timeseries-test', 3, 12.00)
+        timeseries_data = cache_provider.get_timeseries_data('timeseries-test', time_from=1, time_to=3, reverse_direction=True)
+        expected = [(3, 12.0), (2, 11.0), (1, 10.0)]
+        self.assertEqual(expected, timeseries_data)
+
     def test_should_not_fail_when_attempting_to_create_timeseries_multiple_times(self):
         cache_provider = RedisCacheProvider(self.options)
         cache_provider.create_timeseries('timeseries-test', 'price')
@@ -112,6 +122,15 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         cache_provider.add_to_timeseries('timeseries-big-float-test', 2, BigFloat('2000000000.210987654321'))
         timeseries_data = cache_provider.get_timeseries_data('timeseries-big-float-test', time_from=1, time_to=2, double_precision=True)
         expected = [(1, BigFloat('1000000000.123456789012')), (2, BigFloat('2000000000.210987654321'))]
+        self.assertEqual(expected, timeseries_data)
+
+    def test_should_store_time_series_with_big_floats_in_reverse(self):
+        cache_provider = RedisCacheProvider(self.options)
+        cache_provider.create_timeseries('timeseries-big-float-test', 'price', double_precision=True)
+        cache_provider.add_to_timeseries('timeseries-big-float-test', 1, BigFloat('1000000000.123456789012'))
+        cache_provider.add_to_timeseries('timeseries-big-float-test', 2, BigFloat('2000000000.210987654321'))
+        timeseries_data = cache_provider.get_timeseries_data('timeseries-big-float-test', time_from=1, time_to=2, double_precision=True, reverse_direction=True)
+        expected = [(2, BigFloat('2000000000.210987654321')), (1, BigFloat('1000000000.123456789012'))]
         self.assertEqual(expected, timeseries_data)
 
     def test_should_store_time_series_with_big_floats_having_leading_zeros(self):
