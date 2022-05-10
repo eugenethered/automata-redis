@@ -19,8 +19,16 @@ class RedisCacheProviderTestCase(unittest.TestCase):
 
     def tearDown(self):
         cache_provider = RedisCacheProvider(self.options)
+        cache_provider.delete('test-na-float')
+        cache_provider.delete('test-foo')
+        cache_provider.delete('test-config')
+        cache_provider.delete('test-multi-config')
+        cache_provider.delete('test-number')
+        cache_provider.delete('test-big-float')
+        cache_provider.delete('test-float')
         cache_provider.delete_timeseries('timeseries-test')
         cache_provider.delete_timeseries('timeseries-big-float-test', double_precision=True)
+        cache_provider.delete_timeseries('timeseries-test-limited-retention')
 
     def test_should_connect_to_redis_server(self):
         cache_provider = RedisCacheProvider(self.options)
@@ -199,8 +207,21 @@ class RedisCacheProviderTestCase(unittest.TestCase):
 
     def test_should_fetch_key_names_matching_pattern(self):
         cache_provider = RedisCacheProvider(self.options)
+        cache_provider.store('test-foo', 'bar')
+        cache_provider.store('test-number', 10)
         keys = cache_provider.get_keys('test-*')
         self.assertGreater(len(keys), 0)
+
+    def test_should_store_time_series_with_limited_retention(self):
+        cache_provider = RedisCacheProvider(self.options)
+        # limit to 100 ms
+        timeseries_key = 'timeseries-test-limited-retention'
+        cache_provider.create_timeseries(timeseries_key, 'price', limit_retention=100)
+        cache_provider.add_to_timeseries(timeseries_key, '*', 10.00)
+        cache_provider.add_to_timeseries(timeseries_key, '*', 11.00)
+        cache_provider.add_to_timeseries(timeseries_key, '*', 12.00)
+        retention_time = cache_provider.get_timeseries_retention_time(timeseries_key)
+        self.assertEqual(retention_time, 100)
 
 
 if __name__ == '__main__':

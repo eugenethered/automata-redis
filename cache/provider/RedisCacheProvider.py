@@ -79,15 +79,15 @@ class RedisCacheProvider:
     def fraction_leading_zeros_key(key):
         return f'{key}:fraction:leading-zeros'
 
-    def __create_timeseries(self, key, field_name):
+    def __create_timeseries(self, key, field_name, limit_retention):
         if not self.does_timeseries_exist(key):
-            self.redis_timeseries.create(key, labels={'time': field_name})
+            self.redis_timeseries.create(key, labels={'time': field_name}, retention_msecs=limit_retention)
 
-    def create_timeseries(self, key, field_name, double_precision=False):
-        self.__create_timeseries(key, field_name)
+    def create_timeseries(self, key, field_name, double_precision=False, limit_retention=0):
+        self.__create_timeseries(key, field_name, limit_retention)
         if double_precision:
-            self.__create_timeseries(self.fraction_key(key), field_name)
-            self.__create_timeseries(self.fraction_leading_zeros_key(key), field_name)
+            self.__create_timeseries(self.fraction_key(key), field_name, limit_retention)
+            self.__create_timeseries(self.fraction_leading_zeros_key(key), field_name, limit_retention)
 
     def add_to_timeseries(self, key, time, value):
         if type(value) is BigFloat:
@@ -127,4 +127,8 @@ class RedisCacheProvider:
         if double_precision:
             self.delete(self.fraction_key(key))
             self.delete(self.fraction_leading_zeros_key(key))
+
+    def get_timeseries_retention_time(self, timeseries_key):
+        info = self.redis_timeseries.info(timeseries_key)
+        return info.retention_msecs
 
