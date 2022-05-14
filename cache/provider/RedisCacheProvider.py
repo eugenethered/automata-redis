@@ -5,7 +5,7 @@ import redis
 from core.constants.not_available import NOT_AVAILABLE
 from core.number.BigFloat import BigFloat
 from core.options.exception.MissingOptionError import MissingOptionError
-from utility.json_utility import as_pretty_json, as_json
+from coreutility.json.json_utility import as_pretty_json, as_json
 
 T = TypeVar("T")
 
