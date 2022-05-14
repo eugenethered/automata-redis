@@ -28,7 +28,8 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         cache_provider.delete('test-float')
         cache_provider.delete_timeseries('timeseries-test')
         cache_provider.delete_timeseries('timeseries-big-float-test', double_precision=True)
-        cache_provider.delete_timeseries('timeseries-test-limited-retention')
+        cache_provider.delete_timeseries('test-timeseries-limited-retention')
+        cache_provider.delete_timeseries('test-timeseries-big-float-limited-retention', double_precision=True)
 
     def test_should_connect_to_redis_server(self):
         cache_provider = RedisCacheProvider(self.options)
@@ -215,13 +216,24 @@ class RedisCacheProviderTestCase(unittest.TestCase):
     def test_should_store_time_series_with_limited_retention(self):
         cache_provider = RedisCacheProvider(self.options)
         # limit to 100 ms
-        timeseries_key = 'timeseries-test-limited-retention'
+        timeseries_key = 'test-timeseries-limited-retention'
         cache_provider.create_timeseries(timeseries_key, 'price', limit_retention=100)
         cache_provider.add_to_timeseries(timeseries_key, '*', 10.00)
         cache_provider.add_to_timeseries(timeseries_key, '*', 11.00)
         cache_provider.add_to_timeseries(timeseries_key, '*', 12.00)
         retention_time = cache_provider.get_timeseries_retention_time(timeseries_key)
         self.assertEqual(retention_time, 100)
+
+    def test_should_create_double_precision_time_series_all_with_limited_retention(self):
+        cache_provider = RedisCacheProvider(self.options)
+        timeseries_key = 'test-timeseries-big-float-limited-retention'
+        cache_provider.create_timeseries(timeseries_key, 'price', double_precision=True, limit_retention=100)
+        retention_time = cache_provider.get_timeseries_retention_time(timeseries_key)
+        self.assertEqual(retention_time, 100)
+        fraction_retention_time = cache_provider.get_timeseries_retention_time(cache_provider.fraction_key(timeseries_key))
+        self.assertEqual(fraction_retention_time, 100)
+        leading_zero_fraction_retention_time = cache_provider.get_timeseries_retention_time(cache_provider.fraction_leading_zeros_key(timeseries_key))
+        self.assertEqual(leading_zero_fraction_retention_time, 100)
 
 
 if __name__ == '__main__':
