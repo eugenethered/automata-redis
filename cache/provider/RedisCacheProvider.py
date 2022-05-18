@@ -16,23 +16,27 @@ REDIS_SERVER_PORT = 'REDIS_SERVER_PORT'
 class RedisCacheProvider:
 
     def __init__(self, options, auto_connect=True):
+        self.log = logging.getLogger('RedisCacheProvider')
         self.options = options
         self.auto_connect = auto_connect
         self.__check_options()
         if self.auto_connect:
             self.server_address = options[REDIS_SERVER_ADDRESS]
             self.server_port = options[REDIS_SERVER_PORT]
-            logging.info(f'Connecting to REDIS server {self.server_address}:{self.server_port}')
+            self.log.info(f'Connecting to REDIS server {self.server_address}:{self.server_port}')
             self.redis_client = redis.Redis(host=self.server_address, port=self.server_port, decode_responses=True)
             self.redis_timeseries = self.redis_client.ts()
 
     def __check_options(self):
         if self.options is None:
+            self.log.warning(f'missing option please provide options {REDIS_SERVER_ADDRESS} and {REDIS_SERVER_PORT}')
             raise MissingOptionError(f'missing option please provide options {REDIS_SERVER_ADDRESS} and {REDIS_SERVER_PORT}')
         if self.auto_connect is True:
             if REDIS_SERVER_ADDRESS not in self.options:
+                self.log.warning(f'missing option please provide option {REDIS_SERVER_ADDRESS}')
                 raise MissingOptionError(f'missing option please provide option {REDIS_SERVER_ADDRESS}')
             if REDIS_SERVER_PORT not in self.options:
+                self.log.warning(f'missing option please provide option {REDIS_SERVER_PORT}')
                 raise MissingOptionError(f'missing option please provide option {REDIS_SERVER_PORT}')
 
     def can_connect(self):

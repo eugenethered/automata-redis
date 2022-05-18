@@ -8,7 +8,8 @@ class RedisCacheHolder:
 
     def __new__(cls, options=None):
         if cls.__instance is None:
-            logging.info(f'Holder obtaining REDIS cache provider with options:{options}')
+            log = logging.getLogger('RedisCacheHolder')
+            log.info(f'Holder obtaining REDIS cache provider with options:{options}')
             auto_connect = cls.set_auto_connect(options)
             cls.__instance = RedisCacheProvider(options, auto_connect)
         return cls.__instance
