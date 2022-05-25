@@ -199,7 +199,8 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         self.assertEqual(cache_provider.fetch('unknown-key', int), None, 'int should be None')
         self.assertEqual(cache_provider.fetch('unknown-key', float), None, 'float should be None')
         self.assertEqual(cache_provider.fetch('unknown-key', BigFloat), None, 'BigFloat should be None')
-        self.assertEqual(cache_provider.fetch('unknown-key', dict), [], 'dict (json) should be None')
+        self.assertEqual(cache_provider.fetch('unknown-key', dict), None, 'dict (json) should be None')
+        self.assertEqual(cache_provider.fetch('unknown-key', list), [], 'list (json) should be None')
 
     def test_should_fetch_key_names(self):
         cache_provider = RedisCacheProvider(self.options)
@@ -234,6 +235,17 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         self.assertEqual(fraction_retention_time, 100)
         leading_zero_fraction_retention_time = cache_provider.get_timeseries_retention_time(cache_provider.fraction_leading_zeros_key(timeseries_key))
         self.assertEqual(leading_zero_fraction_retention_time, 100)
+
+    def test_should_retrieve_not_found_dict_data_as_none(self):
+        cache_provider = RedisCacheProvider(self.options)
+        dictionary_value = cache_provider.fetch('test-empty-value', as_type=dict)
+        self.assertIsNone(dictionary_value)
+
+    def test_should_retrieve_not_found_list_data_as_empty_list(self):
+        cache_provider = RedisCacheProvider(self.options)
+        list_value = cache_provider.fetch('test-empty-value', as_type=list)
+        self.assertIsNotNone(list_value)
+        self.assertTrue(len(list_value) == 0)
 
 
 if __name__ == '__main__':

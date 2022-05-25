@@ -67,7 +67,10 @@ class RedisCacheProvider:
             return None if value is None else float(value)
         elif as_type is BigFloat:
             return None if value is None else BigFloat(value)
-        elif as_type is dict or as_type is list:
+        elif as_type is dict:
+            result = as_json(value)
+            return None if len(result) == 0 else result
+        elif as_type is list:
             return as_json(value)
         else:
             return value
