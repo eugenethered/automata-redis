@@ -57,6 +57,13 @@ class RedisCacheProvider:
         else:
             self.redis_client.set(key, value)
 
+    def append_store(self, key, value):
+        if type(value) is list or type(value) is dict:
+            existing_values = self.fetch(key, as_type=list)
+            existing_values.append(value)
+            serialized_json = as_pretty_json(existing_values, indent=None)
+            self.store(key, serialized_json)
+
     def fetch(self, key, as_type: T = str):
         value = self.redis_client.get(key)
         if value is not None and value == NOT_AVAILABLE:

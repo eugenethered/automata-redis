@@ -26,6 +26,7 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         cache_provider.delete('test-number')
         cache_provider.delete('test-big-float')
         cache_provider.delete('test-float')
+        cache_provider.delete('test-list')
         cache_provider.delete_timeseries('timeseries-test')
         cache_provider.delete_timeseries('timeseries-big-float-test', double_precision=True)
         cache_provider.delete_timeseries('test-timeseries-limited-retention')
@@ -62,6 +63,21 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         cache_provider.store('test-float', 100.12)
         value = cache_provider.fetch('test-float', as_type=float)
         self.assertEqual(value, 100.12)
+
+    def test_should_store_key_list_value(self):
+        cache_provider = RedisCacheProvider(self.options)
+        cache_provider.store('test-list', [['A', 'B'], ['C', 'D']])
+        value = cache_provider.fetch('test-list', as_type=list)
+        self.assertEqual(value, [['A', 'B'], ['C', 'D']])
+
+    def test_should_append_store_key_list_value(self):
+        cache_provider = RedisCacheProvider(self.options)
+        cache_provider.store('test-list', [['A', 'B'], ['C', 'D']])
+        value = cache_provider.fetch('test-list', as_type=list)
+        self.assertEqual(value, [['A', 'B'], ['C', 'D']])
+        cache_provider.append_store('test-list', ['E', 'F'])
+        value_appended = cache_provider.fetch('test-list', as_type=list)
+        self.assertEqual(value_appended, [['A', 'B'], ['C', 'D'], ['E', 'F']])
 
     def test_should_not_store_none_value(self):
         with self.assertRaises(DataError):
