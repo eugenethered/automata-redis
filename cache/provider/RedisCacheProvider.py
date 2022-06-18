@@ -49,12 +49,16 @@ class RedisCacheProvider:
         return self.redis_client.keys(pattern)
 
     def store(self, key, value):
+        self.log.debug(f'storing for key:{key}')
         if type(value) is BigFloat:
+            self.log.debug(f'BigFloat storing key:{key} [{value}]')
             self.redis_client.set(key, str(value))
         elif type(value) is list or type(value) is dict:
+            self.log.debug(f'collection storing key:{key} [{len(value)}]')
             serialized_json = as_pretty_json(value, indent=None)
             self.redis_client.set(key, serialized_json)
         else:
+            self.log.debug(f'default storing key:{key} [{value}]')
             self.redis_client.set(key, value)
 
     def append_store(self, key, value):
@@ -64,6 +68,7 @@ class RedisCacheProvider:
         self.store(key, serialized_json)
 
     def fetch(self, key, as_type: T = str):
+        self.log.debug(f'fetching for key:{key}')
         value = self.redis_client.get(key)
         if value is not None and value == NOT_AVAILABLE:
             return NOT_AVAILABLE
@@ -75,9 +80,12 @@ class RedisCacheProvider:
             return None if value is None else BigFloat(value)
         elif as_type is dict:
             result = as_json(value)
+            self.log.debug(f'dict fetching key:{key} [{len(result)}]')
             return None if len(result) == 0 else result
         elif as_type is list:
-            return as_json(value)
+            result = as_json(value)
+            self.log.debug(f'list fetching key:{key} [{len(result)}]')
+            return result
         else:
             return value
 
