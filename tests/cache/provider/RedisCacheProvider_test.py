@@ -151,6 +151,5 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         self.assertEqual(str(value), '1000000000.000000000012')
 
 
-
 if __name__ == '__main__':
     unittest.main()

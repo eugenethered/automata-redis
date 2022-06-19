@@ -51,14 +51,14 @@ class RedisCacheProvider:
         self.log.debug(f'storing for key:{key}')
         if type(value) is BigFloat:
             self.log.debug(f'BigFloat storing key:{key} [{value}]')
-            return self.redis_client.set(key, str(value))
+            self.redis_client.set(key, str(value))
         elif type(value) is list or type(value) is dict:
             self.log.debug(f'collection storing key:{key} [{len(value)}]')
             serialized_json = as_pretty_json(value, indent=None)
-            return self.redis_client.set(key, serialized_json)
+            self.redis_client.set(key, serialized_json)
         else:
             self.log.debug(f'default storing key:{key} [{value}]')
-            return self.redis_client.set(key, value)
+            self.redis_client.set(key, value)
 
     def fetch(self, key, as_type: T = str):
         value = self.redis_client.get(key)
