@@ -20,6 +20,7 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         cache_provider.delete('test:values:dictionary-simple')
         cache_provider.delete('test:values:dictionary-simple-multiple')
         cache_provider.delete('test:values:dictionary-multiple-simple-list')
+        cache_provider.delete('test:values:dictionary-multiple-complex-key')
 
     def test_should_store_list_of_values_by_each_key(self):
         cache_provider = RedisCacheProviderWithHash(self.options)
@@ -35,7 +36,7 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         values = cache_provider.fetch_values('test:values:dictionary-simple-multiple')
         self.assertEqual(values, {'A': '1', 'B': '2'}, 'should convert to string values!')
 
-    def test_should_store_list_of_values_using_specified_key(self):
+    def test_should_store_list_of_values_using_default_key(self):
         cache_provider = RedisCacheProviderWithHash(self.options)
         values_to_store = [
             {'A': '1'},
@@ -44,7 +45,20 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         ]
         cache_provider.store_values('test:values:dictionary-multiple-simple-list', values_to_store)
         values = cache_provider.fetch_values('test:values:dictionary-multiple-simple-list', as_type=list)
-        print(f'values returned! -> {values}')
+        self.assertEqual(values, values_to_store)
+
+    def test_should_store_list_of_values_using_specified_key(self):
+        cache_provider = RedisCacheProviderWithHash(self.options)
+        values_to_store = [
+            {'name': 'A', 'context': 'M'},
+            {'name': 'B', 'context': 'M'},
+            {'name': 'C', 'context': 'M'}
+        ]
+
+        value_custom_key = lambda value: f'{value["name"]}{value["context"]}'
+
+        cache_provider.store_values('test:values:dictionary-multiple-complex-key', values_to_store, custom_key=value_custom_key)
+        values = cache_provider.fetch_values('test:values:dictionary-multiple-complex-key', as_type=list)
         self.assertEqual(values, values_to_store)
 
 
