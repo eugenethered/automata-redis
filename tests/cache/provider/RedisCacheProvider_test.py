@@ -1,3 +1,4 @@
+import logging
 import unittest
 from datetime import datetime
 
@@ -12,6 +13,9 @@ from cache.provider.RedisCacheProvider import RedisCacheProvider
 class RedisCacheProviderTestCase(unittest.TestCase):
 
     def setUp(self):
+        logging.basicConfig(level=logging.INFO)
+        logging.getLogger('RedisCacheProvider').setLevel(logging.DEBUG)
+
         self.options = {
             'REDIS_SERVER_ADDRESS': '192.168.1.90',
             'REDIS_SERVER_PORT': 6379
@@ -27,6 +31,7 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         cache_provider.delete('test-big-float')
         cache_provider.delete('test-float')
         cache_provider.delete('test-list')
+        cache_provider.delete('test:test-list-json')
         cache_provider.delete_timeseries('timeseries-test')
         cache_provider.delete_timeseries('timeseries-big-float-test', double_precision=True)
         cache_provider.delete_timeseries('test-timeseries-limited-retention')
@@ -69,21 +74,6 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         cache_provider.store('test-list', [['A', 'B'], ['C', 'D']])
         value = cache_provider.fetch('test-list', as_type=list)
         self.assertEqual(value, [['A', 'B'], ['C', 'D']])
-
-    def test_should_append_store_key_list_value(self):
-        cache_provider = RedisCacheProvider(self.options)
-        cache_provider.store('test-list', [['A', 'B'], ['C', 'D']])
-        value = cache_provider.fetch('test-list', as_type=list)
-        self.assertEqual(value, [['A', 'B'], ['C', 'D']])
-        cache_provider.append_store('test-list', ['E', 'F'])
-        value_appended = cache_provider.fetch('test-list', as_type=list)
-        self.assertEqual(value_appended, [['A', 'B'], ['C', 'D'], ['E', 'F']])
-
-    def test_should_append_store_key_list_value_when_no_values(self):
-        cache_provider = RedisCacheProvider(self.options)
-        cache_provider.append_store('test-list', ['E', 'F'])
-        value_appended = cache_provider.fetch('test-list', as_type=list)
-        self.assertEqual(value_appended, [['E', 'F']])
 
     def test_should_not_store_none_value(self):
         with self.assertRaises(DataError):
@@ -268,6 +258,21 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         list_value = cache_provider.fetch('test-empty-value', as_type=list)
         self.assertIsNotNone(list_value)
         self.assertTrue(len(list_value) == 0)
+
+    def test_should_overwrite_values(self):
+        cache_provider = RedisCacheProvider(self.options)
+        values = [
+            {"test": "A", "context": "C1", "other": "111", "description": "Storing Value 1"},
+            {"test": "B", "context": "C1", "other": "101", "description": "Storing Value 2"},
+            {"test": "C", "context": "C1", "other": "100", "description": "Storing Value 3"}
+        ]
+        cache_provider.store('test:test-list-json', values)
+        stored_values = cache_provider.fetch('test:test-list-json', as_type=list)
+        self.assertEqual(len(stored_values), 3)
+        values_without_removed = [v for v in values if v['test'] != 'B']
+        cache_provider.overwrite_store('test:test-list-json', values_without_removed)
+        stored_values_check = cache_provider.fetch('test:test-list-json', as_type=list)
+        self.assertEqual(len(stored_values_check), 2)
 
 
 if __name__ == '__main__':

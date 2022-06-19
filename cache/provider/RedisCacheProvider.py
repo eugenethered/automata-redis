@@ -52,29 +52,25 @@ class RedisCacheProvider:
         self.log.debug(f'storing for key:{key}')
         if type(value) is BigFloat:
             self.log.debug(f'BigFloat storing key:{key} [{value}]')
-            self.redis_client.set(key, str(value))
+            return self.redis_client.set(key, str(value))
         elif type(value) is list or type(value) is dict:
             self.log.debug(f'collection storing key:{key} [{len(value)}]')
             serialized_json = as_pretty_json(value, indent=None)
-            self.redis_client.set(key, serialized_json)
+            return self.redis_client.set(key, serialized_json)
         else:
             self.log.debug(f'default storing key:{key} [{value}]')
-            self.redis_client.set(key, value)
-
-    def append_store(self, key, value):
-        self.log.debug(f'appending store for key:{key}')
-        existing_values = self.fetch(key, as_type=list)
-        self.delete(key)
-        existing_values.append(value)
-        self.store(key, existing_values)
+            return self.redis_client.set(key, value)
 
     def overwrite_store(self, key, values):
-        self.delete(key)
-        self.store(key, values)
+        self.log.debug(f'overwrite values:[{len(values)}] for key:[{key}]')
+        delete_result = self.delete(key)
+        self.log.debug(f'overwrite delete result:[{delete_result}] for key:[{key}]')
+        store_result = self.store(key, values)
+        self.log.debug(f'overwrite store result:[{store_result}] for key:[{key}]')
 
     def fetch(self, key, as_type: T = str):
-        self.log.debug(f'fetching for key:{key}')
         value = self.redis_client.get(key)
+        self.log.debug(f'fetching for key:{key} value:[{len(value)}] (parse later)')
         if value is not None and value == NOT_AVAILABLE:
             return NOT_AVAILABLE
         if as_type is int:
@@ -95,7 +91,7 @@ class RedisCacheProvider:
             return value
 
     def delete(self, key):
-        self.redis_client.delete(key)
+        return self.redis_client.delete(key)
 
     @staticmethod
     def fraction_key(key):
