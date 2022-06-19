@@ -21,6 +21,7 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         cache_provider.delete('test:values:dictionary-simple-multiple')
         cache_provider.delete('test:values:dictionary-multiple-simple-list')
         cache_provider.delete('test:values:dictionary-multiple-complex-key')
+        cache_provider.delete('test:values:dictionary-multiple-complex-key-update')
 
     def test_should_store_list_of_values_by_each_key(self):
         cache_provider = RedisCacheProviderWithHash(self.options)
@@ -60,6 +61,27 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         cache_provider.store_values('test:values:dictionary-multiple-complex-key', values_to_store, custom_key=value_custom_key)
         values = cache_provider.fetch_values('test:values:dictionary-multiple-complex-key', as_type=list)
         self.assertEqual(values, values_to_store)
+
+    def test_should_update_specific_value_in_list_using_specified_key(self):
+        cache_provider = RedisCacheProviderWithHash(self.options)
+        values_to_store = [
+            {'name': 'A', 'context': 'M'},
+            {'name': 'B', 'context': 'M'},
+            {'name': 'C', 'context': 'M'}
+        ]
+        value_custom_key = lambda value: f'{value["name"]}{value["context"]}'
+        cache_provider.store_values('test:values:dictionary-multiple-complex-key-update', values_to_store, custom_key=value_custom_key)
+        values = cache_provider.fetch_values('test:values:dictionary-multiple-complex-key-update', as_type=list)
+        self.assertEqual(values, values_to_store)
+        value_to_update = {'name': 'B+', 'context': 'M'}
+        cache_provider.store_values_value('test:values:dictionary-multiple-complex-key-update', 'BM', value_to_update)
+        updated_values = cache_provider.fetch_values('test:values:dictionary-multiple-complex-key-update', as_type=list)
+        expected_values = [
+            {'name': 'A', 'context': 'M'},
+            {'name': 'B+', 'context': 'M'},
+            {'name': 'C', 'context': 'M'}
+        ]
+        self.assertEqual(updated_values, expected_values)
 
 
 if __name__ == '__main__':
