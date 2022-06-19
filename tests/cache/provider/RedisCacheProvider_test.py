@@ -79,6 +79,12 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         value_appended = cache_provider.fetch('test-list', as_type=list)
         self.assertEqual(value_appended, [['A', 'B'], ['C', 'D'], ['E', 'F']])
 
+    def test_should_append_store_key_list_value_when_no_values(self):
+        cache_provider = RedisCacheProvider(self.options)
+        cache_provider.append_store('test-list', ['E', 'F'])
+        value_appended = cache_provider.fetch('test-list', as_type=list)
+        self.assertEqual(value_appended, [['E', 'F']])
+
     def test_should_not_store_none_value(self):
         with self.assertRaises(DataError):
             cache_provider = RedisCacheProvider(self.options)

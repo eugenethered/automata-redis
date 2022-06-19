@@ -62,7 +62,9 @@ class RedisCacheProvider:
             self.redis_client.set(key, value)
 
     def append_store(self, key, value):
+        self.log.debug(f'appending store for key:{key}')
         existing_values = self.fetch(key, as_type=list)
+        self.delete(key)
         existing_values.append(value)
         serialized_json = as_pretty_json(existing_values, indent=None)
         self.store(key, serialized_json)
