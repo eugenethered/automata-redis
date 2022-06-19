@@ -66,13 +66,11 @@ class RedisCacheProvider:
         existing_values = self.fetch(key, as_type=list)
         self.delete(key)
         existing_values.append(value)
-        serialized_json = as_pretty_json(existing_values, indent=None)
-        self.store(key, serialized_json)
+        self.store(key, existing_values)
 
     def overwrite_store(self, key, values):
         self.delete(key)
-        serialized_json = as_pretty_json(values, indent=None)
-        self.store(key, serialized_json)
+        self.store(key, values)
 
     def fetch(self, key, as_type: T = str):
         self.log.debug(f'fetching for key:{key}')
