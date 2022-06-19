@@ -69,6 +69,11 @@ class RedisCacheProvider:
         serialized_json = as_pretty_json(existing_values, indent=None)
         self.store(key, serialized_json)
 
+    def overwrite_store(self, key, values):
+        self.delete(key)
+        serialized_json = as_pretty_json(values, indent=None)
+        self.store(key, serialized_json)
+
     def fetch(self, key, as_type: T = str):
         self.log.debug(f'fetching for key:{key}')
         value = self.redis_client.get(key)
