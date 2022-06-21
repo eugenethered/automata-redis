@@ -63,12 +63,6 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         value = cache_provider.fetch('test-float', as_type=float)
         self.assertEqual(value, 100.12)
 
-    def test_should_store_key_list_value(self):
-        cache_provider = RedisCacheProvider(self.options)
-        cache_provider.store('test-list', [['A', 'B'], ['C', 'D']])
-        value = cache_provider.fetch('test-list', as_type=list)
-        self.assertEqual(value, [['A', 'B'], ['C', 'D']])
-
     def test_should_not_store_none_value(self):
         with self.assertRaises(DataError):
             cache_provider = RedisCacheProvider(self.options)
@@ -80,32 +74,6 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         value = cache_provider.fetch('test-na-float', as_type=float)
         self.assertEqual(value, NOT_AVAILABLE)
 
-    def test_should_store_json_data(self):
-        config = {
-            'name': 'Eugene',
-            'last': 'The Red',
-            'address': {
-                'place': 'on my island'
-            }
-        }
-        cache_provider = RedisCacheProvider(self.options)
-        cache_provider.store('test-config', config)
-        value = cache_provider.fetch('test-config', as_type=dict)
-        self.assertEqual(config, value)
-
-    def test_should_store_multiples_of_json_data(self):
-        config = [{
-            'name': 'Eugene',
-            'last': 'The Red',
-            'address': {
-                'place': 'on my island'
-            }
-        }]
-        cache_provider = RedisCacheProvider(self.options)
-        cache_provider.store('test-multi-config', config)
-        value = cache_provider.fetch('test-multi-config', as_type=dict)
-        self.assertEqual(config, value)
-
     def test_should_fetch_relative_none_results_when_key_has_not_been_created(self):
         cache_provider = RedisCacheProvider(self.options)
         self.assertEqual(cache_provider.fetch('unknown-key'), None, 'string should be None')
@@ -113,7 +81,6 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         self.assertEqual(cache_provider.fetch('unknown-key', float), None, 'float should be None')
         self.assertEqual(cache_provider.fetch('unknown-key', BigFloat), None, 'BigFloat should be None')
         self.assertEqual(cache_provider.fetch('unknown-key', dict), None, 'dict (json) should be None')
-        self.assertEqual(cache_provider.fetch('unknown-key', list), [], 'list (json) should be None')
 
     def test_should_fetch_key_names(self):
         cache_provider = RedisCacheProvider(self.options)
@@ -131,12 +98,6 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         cache_provider = RedisCacheProvider(self.options)
         dictionary_value = cache_provider.fetch('test-empty-value', as_type=dict)
         self.assertIsNone(dictionary_value)
-
-    def test_should_retrieve_not_found_list_data_as_empty_list(self):
-        cache_provider = RedisCacheProvider(self.options)
-        list_value = cache_provider.fetch('test-empty-value', as_type=list)
-        self.assertIsNotNone(list_value)
-        self.assertTrue(len(list_value) == 0)
 
     def test_should_store_key_large_precision_float_value(self):
         cache_provider = RedisCacheProvider(self.options)

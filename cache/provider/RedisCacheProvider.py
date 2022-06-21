@@ -5,7 +5,6 @@ import redis
 from core.constants.not_available import NOT_AVAILABLE
 from core.number.BigFloat import BigFloat
 from core.options.exception.MissingOptionError import MissingOptionError
-from coreutility.json.json_utility import as_pretty_json, as_json
 
 T = TypeVar("T")
 
@@ -52,10 +51,6 @@ class RedisCacheProvider:
         if type(value) is BigFloat:
             self.log.debug(f'BigFloat storing key:{key} [{value}]')
             self.redis_client.set(key, str(value))
-        elif type(value) is list or type(value) is dict:
-            self.log.debug(f'collection storing key:{key} [{len(value)}]')
-            serialized_json = as_pretty_json(value, indent=None)
-            self.redis_client.set(key, serialized_json)
         else:
             self.log.debug(f'default storing key:{key} [{value}]')
             self.redis_client.set(key, value)
@@ -70,14 +65,6 @@ class RedisCacheProvider:
             return None if value is None else float(value)
         elif as_type is BigFloat:
             return None if value is None else BigFloat(value)
-        elif as_type is dict:
-            result = as_json(value)
-            self.log.debug(f'dict fetching key:{key} [{len(result)}]')
-            return None if len(result) == 0 else result
-        elif as_type is list:
-            result = as_json(value)
-            self.log.debug(f'list fetching key:{key} [{len(result)}]')
-            return result
         else:
             return value
 

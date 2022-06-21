@@ -8,7 +8,7 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
 
     def setUp(self):
         logging.basicConfig(level=logging.INFO)
-        logging.getLogger('RedisCacheProviderWithHash').setLevel(logging.DEBUG)
+        logging.getLogger('RedisCacheProvider').setLevel(logging.DEBUG)
 
         self.options = {
             'REDIS_SERVER_ADDRESS': '192.168.1.90',
@@ -24,6 +24,9 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         cache_provider.delete('test:values:dictionary-multiple-complex-key-update')
         cache_provider.delete('test:mv:complex-key-create')
         cache_provider.delete('test:mv:complex-key-delete')
+        cache_provider.delete('test:mv:list')
+        cache_provider.delete('test:mv:test-config')
+        cache_provider.delete('test:mv:test-multi-config')
 
     def test_should_store_list_of_values_by_each_key(self):
         cache_provider = RedisCacheProviderWithHash(self.options)
@@ -125,6 +128,38 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
             {'name': 'C', 'context': 'M'}
         ]
         self.assertEqual(updated_values, expected_values)
+
+    def test_should_store_key_list_value(self):
+        cache_provider = RedisCacheProviderWithHash(self.options)
+        cache_provider.values_store('test:mv:list', [['A', 'B'], ['C', 'D']])
+        value = cache_provider.values_fetch('test:mv:list', as_type=list)
+        self.assertEqual(value, [['A', 'B'], ['C', 'D']])
+
+    def test_should_store_json_data(self):
+        config = {
+            'name': 'Eugene',
+            'last': 'The Red',
+            'address': {
+                'place': 'on my island'
+            }
+        }
+        cache_provider = RedisCacheProviderWithHash(self.options)
+        cache_provider.values_store('test:mv:test-config', config)
+        value = cache_provider.values_fetch('test:mv:test-config')
+        self.assertEqual(config, value)
+
+    def test_should_store_multiples_of_json_data(self):
+        config = [{
+            'name': 'Eugene',
+            'last': 'The Red',
+            'address': {
+                'place': 'on my island'
+            }
+        }]
+        cache_provider = RedisCacheProviderWithHash(self.options)
+        cache_provider.values_store('test:mv:test-multi-config', config)
+        values = cache_provider.values_fetch('test:mv:test-multi-config', as_type=list)
+        self.assertEqual(values, config)
 
 
 if __name__ == '__main__':

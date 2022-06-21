@@ -3,13 +3,12 @@ import logging
 import redis
 from core.number.BigFloat import BigFloat
 
-from cache.provider.RedisCacheProvider import RedisCacheProvider
+from cache.provider.RedisCacheProviderWithHash import RedisCacheProviderWithHash
 
 
-class RedisCacheProviderWithTimeSeries(RedisCacheProvider):
+class RedisCacheProviderWithTimeSeries(RedisCacheProviderWithHash):
 
     def __init__(self, options, auto_connect=True):
-        self.log = logging.getLogger('RedisCacheProviderWithTimeSeries')
         super().__init__(options, auto_connect)
         if self.auto_connect:
             self.redis_timeseries = self.redis_client.ts()
