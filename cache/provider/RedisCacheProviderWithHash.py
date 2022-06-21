@@ -36,7 +36,7 @@ class RedisCacheProviderWithHash(RedisCacheProvider):
     def values_delete_value(self, key, value_key):
         self.redis_client.hdel(key, value_key)
 
-    def values_fetch(self, key, as_type: T = dict):
+    def values_fetch(self, key, as_type: T = list):
         self.log.debug(f'fetching values for key:{key}')
         if as_type is dict:
             values = self.redis_client.hgetall(key)

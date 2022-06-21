@@ -32,14 +32,14 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         cache_provider = RedisCacheProviderWithHash(self.options)
         values_to_store = {'A': '1'}
         cache_provider.values_store('test:values:dictionary-simple', values_to_store)
-        values = cache_provider.values_fetch('test:values:dictionary-simple')
+        values = cache_provider.values_fetch('test:values:dictionary-simple', as_type=dict)
         self.assertEqual(values, values_to_store)
 
     def test_should_store_list_of_values_by_each_key_for_multiple_keys(self):
         cache_provider = RedisCacheProviderWithHash(self.options)
         values_to_store = {'A': '1', 'B': 2}
         cache_provider.values_store('test:values:dictionary-simple-multiple', values_to_store)
-        values = cache_provider.values_fetch('test:values:dictionary-simple-multiple')
+        values = cache_provider.values_fetch('test:values:dictionary-simple-multiple', as_type=dict)
         self.assertEqual(values, {'A': '1', 'B': '2'}, 'should convert to string values!')
 
     def test_should_store_list_of_values_using_default_key(self):
@@ -50,7 +50,7 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
             {'C': '3'}
         ]
         cache_provider.values_store('test:values:dictionary-multiple-simple-list', values_to_store)
-        values = cache_provider.values_fetch('test:values:dictionary-multiple-simple-list', as_type=list)
+        values = cache_provider.values_fetch('test:values:dictionary-multiple-simple-list')
         self.assertEqual(values, values_to_store)
 
     def test_should_store_list_of_values_using_specified_key(self):
@@ -64,7 +64,7 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         value_custom_key = lambda value: f'{value["name"]}{value["context"]}'
 
         cache_provider.values_store('test:values:dictionary-multiple-complex-key', values_to_store, custom_key=value_custom_key)
-        values = cache_provider.values_fetch('test:values:dictionary-multiple-complex-key', as_type=list)
+        values = cache_provider.values_fetch('test:values:dictionary-multiple-complex-key')
         self.assertEqual(values, values_to_store)
 
     def test_should_update_specific_value_in_list_using_specified_key(self):
@@ -76,11 +76,11 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         ]
         value_custom_key = lambda value: f'{value["name"]}{value["context"]}'
         cache_provider.values_store('test:values:dictionary-multiple-complex-key-update', values_to_store, custom_key=value_custom_key)
-        values = cache_provider.values_fetch('test:values:dictionary-multiple-complex-key-update', as_type=list)
+        values = cache_provider.values_fetch('test:values:dictionary-multiple-complex-key-update')
         self.assertEqual(values, values_to_store)
         value_to_update = {'name': 'B+', 'context': 'M'}
         cache_provider.values_set_value('test:values:dictionary-multiple-complex-key-update', 'BM', value_to_update)
-        updated_values = cache_provider.values_fetch('test:values:dictionary-multiple-complex-key-update', as_type=list)
+        updated_values = cache_provider.values_fetch('test:values:dictionary-multiple-complex-key-update')
         expected_values = [
             {'name': 'A', 'context': 'M'},
             {'name': 'B+', 'context': 'M'},
@@ -97,11 +97,11 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         ]
         value_custom_key = lambda value: f'{value["name"]}{value["context"]}'
         cache_provider.values_store('test:mv:complex-key-create', values_to_store, custom_key=value_custom_key)
-        values = cache_provider.values_fetch('test:mv:complex-key-create', as_type=list)
+        values = cache_provider.values_fetch('test:mv:complex-key-create')
         self.assertEqual(values, values_to_store)
         value_to_create = {'name': 'D', 'context': 'M'}
         cache_provider.values_set_value('test:mv:complex-key-create', 'DM', value_to_create)
-        updated_values = cache_provider.values_fetch('test:mv:complex-key-create', as_type=list)
+        updated_values = cache_provider.values_fetch('test:mv:complex-key-create')
         expected_values = [
             {'name': 'A', 'context': 'M'},
             {'name': 'B', 'context': 'M'},
@@ -119,10 +119,10 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         ]
         value_custom_key = lambda value: f'{value["name"]}{value["context"]}'
         cache_provider.values_store('test:mv:complex-key-delete', values_to_store, custom_key=value_custom_key)
-        values = cache_provider.values_fetch('test:mv:complex-key-delete', as_type=list)
+        values = cache_provider.values_fetch('test:mv:complex-key-delete')
         self.assertEqual(values, values_to_store)
         cache_provider.values_delete_value('test:mv:complex-key-delete', 'BM')
-        updated_values = cache_provider.values_fetch('test:mv:complex-key-delete', as_type=list)
+        updated_values = cache_provider.values_fetch('test:mv:complex-key-delete')
         expected_values = [
             {'name': 'A', 'context': 'M'},
             {'name': 'C', 'context': 'M'}
@@ -132,7 +132,7 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
     def test_should_store_key_list_value(self):
         cache_provider = RedisCacheProviderWithHash(self.options)
         cache_provider.values_store('test:mv:list', [['A', 'B'], ['C', 'D']])
-        value = cache_provider.values_fetch('test:mv:list', as_type=list)
+        value = cache_provider.values_fetch('test:mv:list')
         self.assertEqual(value, [['A', 'B'], ['C', 'D']])
 
     def test_should_store_json_data(self):
@@ -145,7 +145,7 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         }
         cache_provider = RedisCacheProviderWithHash(self.options)
         cache_provider.values_store('test:mv:test-config', config)
-        value = cache_provider.values_fetch('test:mv:test-config')
+        value = cache_provider.values_fetch('test:mv:test-config', as_type=dict)
         self.assertEqual(config, value)
 
     def test_should_store_multiples_of_json_data(self):
@@ -158,7 +158,7 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         }]
         cache_provider = RedisCacheProviderWithHash(self.options)
         cache_provider.values_store('test:mv:test-multi-config', config)
-        values = cache_provider.values_fetch('test:mv:test-multi-config', as_type=list)
+        values = cache_provider.values_fetch('test:mv:test-multi-config')
         self.assertEqual(values, config)
 
 
