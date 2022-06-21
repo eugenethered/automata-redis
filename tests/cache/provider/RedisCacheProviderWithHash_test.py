@@ -26,15 +26,15 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
     def test_should_store_list_of_values_by_each_key(self):
         cache_provider = RedisCacheProviderWithHash(self.options)
         values_to_store = {'A': '1'}
-        cache_provider.store_values('test:values:dictionary-simple', values_to_store)
-        values = cache_provider.fetch_values('test:values:dictionary-simple')
+        cache_provider.values_store('test:values:dictionary-simple', values_to_store)
+        values = cache_provider.values_fetch('test:values:dictionary-simple')
         self.assertEqual(values, values_to_store)
 
     def test_should_store_list_of_values_by_each_key_for_multiple_keys(self):
         cache_provider = RedisCacheProviderWithHash(self.options)
         values_to_store = {'A': '1', 'B': 2}
-        cache_provider.store_values('test:values:dictionary-simple-multiple', values_to_store)
-        values = cache_provider.fetch_values('test:values:dictionary-simple-multiple')
+        cache_provider.values_store('test:values:dictionary-simple-multiple', values_to_store)
+        values = cache_provider.values_fetch('test:values:dictionary-simple-multiple')
         self.assertEqual(values, {'A': '1', 'B': '2'}, 'should convert to string values!')
 
     def test_should_store_list_of_values_using_default_key(self):
@@ -44,8 +44,8 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
             {'B': '2'},
             {'C': '3'}
         ]
-        cache_provider.store_values('test:values:dictionary-multiple-simple-list', values_to_store)
-        values = cache_provider.fetch_values('test:values:dictionary-multiple-simple-list', as_type=list)
+        cache_provider.values_store('test:values:dictionary-multiple-simple-list', values_to_store)
+        values = cache_provider.values_fetch('test:values:dictionary-multiple-simple-list', as_type=list)
         self.assertEqual(values, values_to_store)
 
     def test_should_store_list_of_values_using_specified_key(self):
@@ -58,8 +58,8 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
 
         value_custom_key = lambda value: f'{value["name"]}{value["context"]}'
 
-        cache_provider.store_values('test:values:dictionary-multiple-complex-key', values_to_store, custom_key=value_custom_key)
-        values = cache_provider.fetch_values('test:values:dictionary-multiple-complex-key', as_type=list)
+        cache_provider.values_store('test:values:dictionary-multiple-complex-key', values_to_store, custom_key=value_custom_key)
+        values = cache_provider.values_fetch('test:values:dictionary-multiple-complex-key', as_type=list)
         self.assertEqual(values, values_to_store)
 
     def test_should_update_specific_value_in_list_using_specified_key(self):
@@ -70,12 +70,12 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
             {'name': 'C', 'context': 'M'}
         ]
         value_custom_key = lambda value: f'{value["name"]}{value["context"]}'
-        cache_provider.store_values('test:values:dictionary-multiple-complex-key-update', values_to_store, custom_key=value_custom_key)
-        values = cache_provider.fetch_values('test:values:dictionary-multiple-complex-key-update', as_type=list)
+        cache_provider.values_store('test:values:dictionary-multiple-complex-key-update', values_to_store, custom_key=value_custom_key)
+        values = cache_provider.values_fetch('test:values:dictionary-multiple-complex-key-update', as_type=list)
         self.assertEqual(values, values_to_store)
         value_to_update = {'name': 'B+', 'context': 'M'}
-        cache_provider.store_values_value('test:values:dictionary-multiple-complex-key-update', 'BM', value_to_update)
-        updated_values = cache_provider.fetch_values('test:values:dictionary-multiple-complex-key-update', as_type=list)
+        cache_provider.values_update_value('test:values:dictionary-multiple-complex-key-update', 'BM', value_to_update)
+        updated_values = cache_provider.values_fetch('test:values:dictionary-multiple-complex-key-update', as_type=list)
         expected_values = [
             {'name': 'A', 'context': 'M'},
             {'name': 'B+', 'context': 'M'},
