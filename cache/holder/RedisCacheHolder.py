@@ -8,7 +8,7 @@ from cache.provider.RedisCacheProviderWithTimeSeries import RedisCacheProviderWi
 T = TypeVar('T', RedisCacheProvider, RedisCacheProviderWithHash, RedisCacheProviderWithTimeSeries)
 
 
-# todo: nice, would be RedisCacheHolder(Generic[T]) (IDE having trouble)
+# todo: nice, would be just RedisCacheHolder(Generic[T]) (IDE having trouble)
 class RedisCacheHolder:
     __instance: T = None
 
