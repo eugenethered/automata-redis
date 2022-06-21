@@ -1,5 +1,3 @@
-import logging
-
 import redis
 from core.number.BigFloat import BigFloat
 
