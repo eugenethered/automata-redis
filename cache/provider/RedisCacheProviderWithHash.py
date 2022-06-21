@@ -1,4 +1,3 @@
-import logging
 from typing import TypeVar
 
 from coreutility.json.json_utility import as_pretty_json, as_json

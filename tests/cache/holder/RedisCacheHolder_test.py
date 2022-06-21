@@ -3,9 +3,15 @@ import unittest
 from core.options.exception.MissingOptionError import MissingOptionError
 
 from cache.holder.RedisCacheHolder import RedisCacheHolder
+from cache.provider.RedisCacheProvider import RedisCacheProvider
+from cache.provider.RedisCacheProviderWithHash import RedisCacheProviderWithHash
+from cache.provider.RedisCacheProviderWithTimeSeries import RedisCacheProviderWithTimeSeries
 
 
 class RedisCacheHolderTestCase(unittest.TestCase):
+
+    def tearDown(self):
+        RedisCacheHolder.re_initialize()
 
     def test_should_initialize_only_one_redis_cache_provider_instance(self):
         options = {
@@ -60,6 +66,36 @@ class RedisCacheHolderTestCase(unittest.TestCase):
             RedisCacheHolder.re_initialize()
             RedisCacheHolder(options)
         self.assertEqual('missing option please provide option REDIS_SERVER_PORT', str(mo.exception))
+
+    def test_should_instantiate_redis_cache_provider(self):
+        options = {
+            'REDIS_SERVER_ADDRESS': '192.168.1.90',
+            'REDIS_SERVER_PORT': 6379,
+            'AUTO_CONNECT': False
+        }
+        cache_holder = RedisCacheHolder(options)
+        self.assertIsNotNone(cache_holder)
+        self.assertIsInstance(cache_holder, RedisCacheProvider)
+
+    def test_should_instantiate_redis_cache_with_hash_provider(self):
+        options = {
+            'REDIS_SERVER_ADDRESS': '192.168.1.90',
+            'REDIS_SERVER_PORT': 6379,
+            'AUTO_CONNECT': False
+        }
+        cache_holder = RedisCacheHolder(options, RedisCacheProviderWithHash)
+        self.assertIsNotNone(cache_holder)
+        self.assertIsInstance(cache_holder, RedisCacheProviderWithHash)
+
+    def test_should_instantiate_redis_cache_with_timeseries_provider(self):
+        options = {
+            'REDIS_SERVER_ADDRESS': '192.168.1.90',
+            'REDIS_SERVER_PORT': 6379,
+            'AUTO_CONNECT': False
+        }
+        cache_holder = RedisCacheHolder(options, RedisCacheProviderWithTimeSeries)
+        self.assertIsNotNone(cache_holder)
+        self.assertIsInstance(cache_holder, RedisCacheProviderWithTimeSeries)
 
 
 if __name__ == '__main__':

@@ -6,12 +6,12 @@ from cache.provider.RedisCacheProvider import RedisCacheProvider
 class RedisCacheHolder:
     __instance = None
 
-    def __new__(cls, options=None):
+    def __new__(cls, options=None, desired_provider=RedisCacheProvider):
         if cls.__instance is None:
             log = logging.getLogger('RedisCacheHolder')
             log.info(f'Holder obtaining REDIS cache provider with options:{options}')
             auto_connect = cls.set_auto_connect(options)
-            cls.__instance = RedisCacheProvider(options, auto_connect)
+            cls.__instance = desired_provider(options, auto_connect)
         return cls.__instance
 
     @staticmethod
