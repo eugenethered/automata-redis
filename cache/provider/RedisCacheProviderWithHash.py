@@ -25,7 +25,7 @@ class RedisCacheProviderWithHash(RedisCacheProvider):
                 serialized_value = as_pretty_json(v, indent=None)
                 self.redis_client.hset(key, value_key, serialized_value)
 
-    def values_update_value(self, key, value_key, value):
+    def values_set_value(self, key, value_key, value):
         serialized_value = as_pretty_json(value, indent=None)
         self.redis_client.hset(key, value_key, serialized_value)
 

@@ -22,6 +22,7 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         cache_provider.delete('test:values:dictionary-multiple-simple-list')
         cache_provider.delete('test:values:dictionary-multiple-complex-key')
         cache_provider.delete('test:values:dictionary-multiple-complex-key-update')
+        cache_provider.delete('test:mv:complex-key-create')
 
     def test_should_store_list_of_values_by_each_key(self):
         cache_provider = RedisCacheProviderWithHash(self.options)
@@ -74,12 +75,34 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         values = cache_provider.values_fetch('test:values:dictionary-multiple-complex-key-update', as_type=list)
         self.assertEqual(values, values_to_store)
         value_to_update = {'name': 'B+', 'context': 'M'}
-        cache_provider.values_update_value('test:values:dictionary-multiple-complex-key-update', 'BM', value_to_update)
+        cache_provider.values_set_value('test:values:dictionary-multiple-complex-key-update', 'BM', value_to_update)
         updated_values = cache_provider.values_fetch('test:values:dictionary-multiple-complex-key-update', as_type=list)
         expected_values = [
             {'name': 'A', 'context': 'M'},
             {'name': 'B+', 'context': 'M'},
             {'name': 'C', 'context': 'M'}
+        ]
+        self.assertEqual(updated_values, expected_values)
+
+    def test_should_create_specific_value_in_list_using_specified_key(self):
+        cache_provider = RedisCacheProviderWithHash(self.options)
+        values_to_store = [
+            {'name': 'A', 'context': 'M'},
+            {'name': 'B', 'context': 'M'},
+            {'name': 'C', 'context': 'M'}
+        ]
+        value_custom_key = lambda value: f'{value["name"]}{value["context"]}'
+        cache_provider.values_store('test:mv:complex-key-create', values_to_store, custom_key=value_custom_key)
+        values = cache_provider.values_fetch('test:mv:complex-key-create', as_type=list)
+        self.assertEqual(values, values_to_store)
+        value_to_create = {'name': 'D', 'context': 'M'}
+        cache_provider.values_set_value('test:mv:complex-key-create', 'DM', value_to_create)
+        updated_values = cache_provider.values_fetch('test:mv:complex-key-create', as_type=list)
+        expected_values = [
+            {'name': 'A', 'context': 'M'},
+            {'name': 'B', 'context': 'M'},
+            {'name': 'C', 'context': 'M'},
+            {'name': 'D', 'context': 'M'}
         ]
         self.assertEqual(updated_values, expected_values)
 
