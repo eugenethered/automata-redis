@@ -29,6 +29,9 @@ class RedisCacheProviderWithHash(RedisCacheProvider):
         serialized_value = as_pretty_json(value, indent=None)
         self.redis_client.hset(key, value_key, serialized_value)
 
+    def values_delete_value(self, key, value_key):
+        self.redis_client.hdel(key, value_key)
+
     def values_fetch(self, key, as_type: T = dict):
         self.log.debug(f'fetching values for key:{key}')
         if as_type is dict:
