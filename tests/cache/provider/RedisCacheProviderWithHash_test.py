@@ -28,6 +28,7 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         cache_provider.delete('test:mv:test-config')
         cache_provider.delete('test:mv:test-multi-config')
         cache_provider.delete('test:mv:get')
+        cache_provider.delete('test:mv:set-get-direct')
 
     def test_should_store_list_of_values_by_each_key(self):
         cache_provider = RedisCacheProviderWithHash(self.options)
@@ -188,6 +189,13 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         cache_provider.values_store('test:mv:test-multi-config', config)
         values = cache_provider.values_fetch('test:mv:test-multi-config')
         self.assertEqual(values, config)
+
+    def test_should_set_and_get_value_directly(self):
+        cache_provider = RedisCacheProviderWithHash(self.options)
+        cache_provider.values_set_value('test:mv:set-get-direct', 'A', 1)
+        value = cache_provider.values_get_value('test:mv:set-get-direct', 'A')
+        # deserialization to type responsible on employer
+        self.assertEquals(value, '1')
 
 
 if __name__ == '__main__':

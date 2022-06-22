@@ -29,15 +29,18 @@ class RedisCacheProviderWithHash(RedisCacheProvider):
                 self.redis_client.hset(key, value_key, serialized_value)
 
     def values_set_value(self, key, value_key, value):
-        serialized_value = as_pretty_json(value, indent=None)
-        self.redis_client.hset(key, value_key, serialized_value)
+        if type(value) is dict:
+            serialized_value = as_pretty_json(value, indent=None)
+            self.redis_client.hset(key, value_key, serialized_value)
+        else:
+            self.redis_client.hset(key, value_key, value)
 
     def values_get_value(self, key, value_key):
         value = self.redis_client.hget(key, value_key)
         if value is None:
             return value
-        value_dict = self.deserialize_value(value)
-        return value_dict[value_key]
+        deserialized_value = self.deserialize_value(value)
+        return deserialized_value[value_key] if type(deserialized_value) is dict else deserialized_value
 
     def values_delete_value(self, key, value_key):
         self.redis_client.hdel(key, value_key)
