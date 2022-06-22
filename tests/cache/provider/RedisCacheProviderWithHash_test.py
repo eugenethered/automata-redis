@@ -29,6 +29,7 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         cache_provider.delete('test:mv:test-multi-config')
         cache_provider.delete('test:mv:get')
         cache_provider.delete('test:mv:set-get-direct')
+        cache_provider.delete('test:mv:list-value')
 
     def test_should_store_list_of_values_by_each_key(self):
         cache_provider = RedisCacheProviderWithHash(self.options)

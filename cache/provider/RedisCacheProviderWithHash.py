@@ -40,7 +40,9 @@ class RedisCacheProviderWithHash(RedisCacheProvider):
         if value is None:
             return value
         deserialized_value = self.deserialize_value(value)
-        return deserialized_value[value_key] if type(deserialized_value) is dict else deserialized_value
+        if type(deserialized_value) is dict:
+            return deserialized_value[value_key] if value_key in deserialized_value else deserialized_value
+        return deserialized_value
 
     def values_delete_value(self, key, value_key):
         self.redis_client.hdel(key, value_key)
