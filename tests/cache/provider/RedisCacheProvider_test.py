@@ -30,6 +30,7 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         cache_provider.delete('test-float')
         cache_provider.delete('test-list')
         cache_provider.delete('test:test-list-json')
+        cache_provider.delete('test:dict-value')
 
     def test_should_connect_to_redis_server(self):
         cache_provider = RedisCacheProvider(self.options)
@@ -110,6 +111,13 @@ class RedisCacheProviderTestCase(unittest.TestCase):
         cache_provider.store('test-big-float', BigFloat('1000000000.000000000012'))
         value = cache_provider.fetch('test-big-float', as_type=BigFloat)
         self.assertEqual(str(value), '1000000000.000000000012')
+
+    def test_should_store_dictionary_value(self):
+        cache_provider = RedisCacheProvider(self.options)
+        value_to_store = {'A': '1', 'B': 2}
+        cache_provider.store('test:dict-value', value_to_store)
+        values = cache_provider.fetch('test:dict-value', as_type=dict)
+        self.assertEqual(values, value_to_store)
 
 
 if __name__ == '__main__':
