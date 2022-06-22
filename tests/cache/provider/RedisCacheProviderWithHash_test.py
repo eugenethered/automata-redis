@@ -27,6 +27,7 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         cache_provider.delete('test:mv:list')
         cache_provider.delete('test:mv:test-config')
         cache_provider.delete('test:mv:test-multi-config')
+        cache_provider.delete('test:mv:get')
 
     def test_should_store_list_of_values_by_each_key(self):
         cache_provider = RedisCacheProviderWithHash(self.options)
@@ -52,6 +53,33 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         cache_provider.values_store('test:values:dictionary-multiple-simple-list', values_to_store)
         values = cache_provider.values_fetch('test:values:dictionary-multiple-simple-list')
         self.assertEqual(values, values_to_store)
+
+    def test_should_obtain_value_using_default_key(self):
+        cache_provider = RedisCacheProviderWithHash(self.options)
+        values_to_store = [
+            {'A': '1'},
+            {'B': '2'},
+            {'C': '3'}
+        ]
+        cache_provider.values_store('test:mv:get', values_to_store)
+        value = cache_provider.values_get_value('test:mv:get', 'B')
+        self.assertEqual(value, '2')
+
+    def test_should_not_obtain_value_using_specified_key(self):
+        cache_provider = RedisCacheProviderWithHash(self.options)
+        values_to_store = [
+            {'A': '1'},
+            {'B': '2'},
+            {'C': '3'}
+        ]
+        cache_provider.values_store('test:mv:get', values_to_store)
+        value = cache_provider.values_get_value('test:mv:get', 'Z')
+        self.assertIsNone(value)
+
+    def test_should_not_obtain_value_using_specified_key_for_store_which_contains_no_values(self):
+        cache_provider = RedisCacheProviderWithHash(self.options)
+        value = cache_provider.values_get_value('test:mv:get-without-values', 'AAA')
+        self.assertIsNone(value)
 
     def test_should_store_list_of_values_using_specified_key(self):
         cache_provider = RedisCacheProviderWithHash(self.options)

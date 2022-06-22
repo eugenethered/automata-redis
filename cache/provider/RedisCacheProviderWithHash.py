@@ -32,6 +32,13 @@ class RedisCacheProviderWithHash(RedisCacheProvider):
         serialized_value = as_pretty_json(value, indent=None)
         self.redis_client.hset(key, value_key, serialized_value)
 
+    def values_get_value(self, key, value_key):
+        value = self.redis_client.hget(key, value_key)
+        if value is None:
+            return value
+        value_dict = self.deserialize_value(value)
+        return value_dict[value_key]
+
     def values_delete_value(self, key, value_key):
         self.redis_client.hdel(key, value_key)
 
@@ -40,9 +47,14 @@ class RedisCacheProviderWithHash(RedisCacheProvider):
         if as_type is dict:
             values = self.redis_client.hgetall(key)
             for k, v in values.items():
-                if v.startswith('{'):
-                    values[k] = as_json(v)
+                values[k] = self.deserialize_value(v)
             return values
         elif as_type is list:
             stored_values = self.redis_client.hgetall(key)
             return list([as_json(v) for k, v in stored_values.items()])
+
+    @staticmethod
+    def deserialize_value(value):
+        if value.startswith('{'):
+            return as_json(value)
+        return value
