@@ -29,7 +29,7 @@ class RedisCacheProviderWithHash(RedisCacheProvider):
                 self.redis_client.hset(key, value_key, serialized_value)
 
     def values_set_value(self, key, value_key, value):
-        if type(value) is dict:
+        if type(value) is dict or type(value) is list:
             serialized_value = as_pretty_json(value, indent=None)
             self.redis_client.hset(key, value_key, serialized_value)
         else:
@@ -58,6 +58,6 @@ class RedisCacheProviderWithHash(RedisCacheProvider):
 
     @staticmethod
     def deserialize_value(value):
-        if value.startswith('{'):
+        if value.startswith('{') or value.startswith('['):
             return as_json(value)
         return value

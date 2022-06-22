@@ -197,6 +197,14 @@ class RedisCacheProviderWithHashTestCase(unittest.TestCase):
         # deserialization to type responsible on employer
         self.assertEquals(value, '1')
 
+    def test_should_set_and_get_values_of_list_directly(self):
+        cache_provider = RedisCacheProviderWithHash(self.options)
+        value = ['X', '0A']
+        cache_provider.values_set_value('test:mv:list-value', 'A', value)
+        stored_value = cache_provider.values_get_value('test:mv:list-value', 'A')
+        # deserialization to type responsible on employer
+        self.assertEquals(stored_value, value)
+
 
 if __name__ == '__main__':
     unittest.main()
