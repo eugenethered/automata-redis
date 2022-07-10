@@ -18,7 +18,7 @@ class RedisCacheProviderWithTimeSeriesTestCase(unittest.TestCase):
     def tearDown(self):
         cache_provider = RedisCacheProviderWithTimeSeries(self.options)
         cache_provider.delete_timeseries('timeseries-test')
-        cache_provider.delete_timeseries('timeseries-big-float-test', double_precision=True)
+        cache_provider.delete_timeseries('test:ts:big-float', double_precision=True)
         cache_provider.delete_timeseries('test-timeseries-limited-retention')
         cache_provider.delete_timeseries('test-timeseries-big-float-limited-retention', double_precision=True)
 
@@ -62,44 +62,53 @@ class RedisCacheProviderWithTimeSeriesTestCase(unittest.TestCase):
 
     def test_should_store_time_series_with_big_floats(self):
         cache_provider = RedisCacheProviderWithTimeSeries(self.options)
-        cache_provider.create_timeseries('timeseries-big-float-test', 'price', double_precision=True)
-        cache_provider.add_to_timeseries('timeseries-big-float-test', 1, BigFloat('1000000000.123456789012'))
-        cache_provider.add_to_timeseries('timeseries-big-float-test', 2, BigFloat('2000000000.210987654321'))
-        timeseries_data = cache_provider.get_timeseries_data('timeseries-big-float-test', time_from=1, time_to=2, double_precision=True)
+        cache_provider.create_timeseries('test:ts:big-float', 'price', double_precision=True)
+        cache_provider.add_to_timeseries('test:ts:big-float', 1, BigFloat('1000000000.123456789012'))
+        cache_provider.add_to_timeseries('test:ts:big-float', 2, BigFloat('2000000000.210987654321'))
+        timeseries_data = cache_provider.get_timeseries_data('test:ts:big-float', time_from=1, time_to=2, double_precision=True)
         expected = [(1, BigFloat('1000000000.123456789012')), (2, BigFloat('2000000000.210987654321'))]
         self.assertEqual(expected, timeseries_data)
 
     def test_should_store_time_series_with_big_floats_in_reverse(self):
         cache_provider = RedisCacheProviderWithTimeSeries(self.options)
-        cache_provider.create_timeseries('timeseries-big-float-test', 'price', double_precision=True)
-        cache_provider.add_to_timeseries('timeseries-big-float-test', 1, BigFloat('1000000000.123456789012'))
-        cache_provider.add_to_timeseries('timeseries-big-float-test', 2, BigFloat('2000000000.210987654321'))
-        timeseries_data = cache_provider.get_timeseries_data('timeseries-big-float-test', time_from=1, time_to=2, double_precision=True, reverse_direction=True)
+        cache_provider.create_timeseries('test:ts:big-float', 'price', double_precision=True)
+        cache_provider.add_to_timeseries('test:ts:big-float', 1, BigFloat('1000000000.123456789012'))
+        cache_provider.add_to_timeseries('test:ts:big-float', 2, BigFloat('2000000000.210987654321'))
+        timeseries_data = cache_provider.get_timeseries_data('test:ts:big-float', time_from=1, time_to=2, double_precision=True, reverse_direction=True)
         expected = [(2, BigFloat('2000000000.210987654321')), (1, BigFloat('1000000000.123456789012'))]
         self.assertEqual(expected, timeseries_data)
 
     def test_should_store_time_series_with_big_floats_having_leading_zeros(self):
         cache_provider = RedisCacheProviderWithTimeSeries(self.options)
-        cache_provider.create_timeseries('timeseries-big-float-test', 'price', double_precision=True)
-        cache_provider.add_to_timeseries('timeseries-big-float-test', 1, BigFloat('1000000000.000000000012'))
-        cache_provider.add_to_timeseries('timeseries-big-float-test', 2, BigFloat('2000000000.010987654321'))
-        timeseries_data = cache_provider.get_timeseries_data('timeseries-big-float-test', time_from=1, time_to=2, double_precision=True)
+        cache_provider.create_timeseries('test:ts:big-float', 'price', double_precision=True)
+        cache_provider.add_to_timeseries('test:ts:big-float', 1, BigFloat('1000000000.000000000012'))
+        cache_provider.add_to_timeseries('test:ts:big-float', 2, BigFloat('2000000000.010987654321'))
+        timeseries_data = cache_provider.get_timeseries_data('test:ts:big-float', time_from=1, time_to=2, double_precision=True)
         expected = [(1, BigFloat('1000000000.000000000012')), (2, BigFloat('2000000000.010987654321'))]
+        self.assertEqual(expected, timeseries_data)
+
+    def test_should_store_time_series_with_big_floats_having_leading_zeros_with_zero_numbers(self):
+        cache_provider = RedisCacheProviderWithTimeSeries(self.options)
+        cache_provider.create_timeseries('test:ts:big-float', 'price', double_precision=True)
+        cache_provider.add_to_timeseries('test:ts:big-float', 1, BigFloat('0.000000000012'))
+        cache_provider.add_to_timeseries('test:ts:big-float', 2, BigFloat('0.010987654321'))
+        timeseries_data = cache_provider.get_timeseries_data('test:ts:big-float', time_from=1, time_to=2, double_precision=True)
+        expected = [(1, BigFloat('0.000000000012')), (2, BigFloat('0.010987654321'))]
         self.assertEqual(expected, timeseries_data)
 
     def test_should_store_time_series_with_mixed_big_floats_to_millisecond_times(self):
         cache_provider = RedisCacheProviderWithTimeSeries(self.options)
-        cache_provider.create_timeseries('timeseries-big-float-test', 'price', double_precision=True)
+        cache_provider.create_timeseries('test:ts:big-float', 'price', double_precision=True)
 
         RunInstantHolder.initialize(datetime.fromisoformat('2021-04-01T21:16:25.919601+00:00'))
         time_interval_1 = RunInstantHolder.numeric_run_instance('')
-        cache_provider.add_to_timeseries('timeseries-big-float-test', time_interval_1, BigFloat('1000000000.123456789012'))
+        cache_provider.add_to_timeseries('test:ts:big-float', time_interval_1, BigFloat('1000000000.123456789012'))
 
         RunInstantHolder.initialize(datetime.fromisoformat('2021-04-01T21:16:25.919605+00:00'))
         time_interval_2 = RunInstantHolder.numeric_run_instance('')
-        cache_provider.add_to_timeseries('timeseries-big-float-test', time_interval_2, BigFloat('1000000000.000000000012'))
+        cache_provider.add_to_timeseries('test:ts:big-float', time_interval_2, BigFloat('1000000000.000000000012'))
 
-        timeseries_data = cache_provider.get_timeseries_data('timeseries-big-float-test', time_from=time_interval_1, time_to=time_interval_2, double_precision=True)
+        timeseries_data = cache_provider.get_timeseries_data('test:ts:big-float', time_from=time_interval_1, time_to=time_interval_2, double_precision=True)
         expected = [(1617311785919601, BigFloat('1000000000.123456789012')), (1617311785919605, BigFloat('1000000000.000000000012'))]
         self.assertEqual(expected, timeseries_data)
 

@@ -2,6 +2,7 @@ import redis
 from core.number.BigFloat import BigFloat
 
 from cache.provider.RedisCacheProviderWithHash import RedisCacheProviderWithHash
+from cache.utility.BigFloat_utility import crack_to_serialize, join_to_deserialize
 
 
 class RedisCacheProviderWithTimeSeries(RedisCacheProviderWithHash):
@@ -13,11 +14,11 @@ class RedisCacheProviderWithTimeSeries(RedisCacheProviderWithHash):
 
     @staticmethod
     def fraction_key(key):
-        return f'{key}:fraction'
+        return f'{key}:d'
 
     @staticmethod
     def fraction_leading_zeros_key(key):
-        return f'{key}:fraction:leading-zeros'
+        return f'{key}:d:lz'
 
     def __create_timeseries(self, key, field_name, limit_retention):
         if not self.does_timeseries_exist(key):
@@ -31,9 +32,10 @@ class RedisCacheProviderWithTimeSeries(RedisCacheProviderWithHash):
 
     def add_to_timeseries(self, key, time, value):
         if type(value) is BigFloat:
-            self.redis_timeseries.add(key, time, value.number)
-            self.redis_timeseries.add(self.fraction_key(key), time, value.fraction)
-            self.redis_timeseries.add(self.fraction_leading_zeros_key(key), time, value.fraction_leading_zeros)
+            (number, decimal, leading_decimal_zeros) = crack_to_serialize(value)
+            self.redis_timeseries.add(key, time, number)
+            self.redis_timeseries.add(self.fraction_key(key), time, decimal)
+            self.redis_timeseries.add(self.fraction_leading_zeros_key(key), time, leading_decimal_zeros)
         else:
             self.redis_timeseries.add(key, time, value)
 
@@ -43,12 +45,12 @@ class RedisCacheProviderWithTimeSeries(RedisCacheProviderWithHash):
                 number_values = self.redis_timeseries.range(key, time_from, time_to)
                 fraction_values = self.redis_timeseries.range(self.fraction_key(key), time_from, time_to)
                 fraction_leading_zero_values = self.redis_timeseries.range(self.fraction_leading_zeros_key(key), time_from, time_to)
-                return [(n1, BigFloat(int(v1), int(v2), int(v3))) for (n1, v1), (f2, v2), (l3, v3) in zip(number_values, fraction_values, fraction_leading_zero_values) if n1 == f2 and n1 == l3]
+                return [(n1, join_to_deserialize(int(v1), int(v2), int(v3))) for (n1, v1), (f2, v2), (l3, v3) in zip(number_values, fraction_values, fraction_leading_zero_values) if n1 == f2 and n1 == l3]
             else:
                 number_values = self.redis_timeseries.revrange(key, time_from, time_to)
                 fraction_values = self.redis_timeseries.revrange(self.fraction_key(key), time_from, time_to)
                 fraction_leading_zero_values = self.redis_timeseries.revrange(self.fraction_leading_zeros_key(key), time_from, time_to)
-                return [(n1, BigFloat(int(v1), int(v2), int(v3))) for (n1, v1), (f2, v2), (l3, v3) in zip(number_values, fraction_values, fraction_leading_zero_values) if n1 == f2 and n1 == l3]
+                return [(n1, join_to_deserialize(int(v1), int(v2), int(v3))) for (n1, v1), (f2, v2), (l3, v3) in zip(number_values, fraction_values, fraction_leading_zero_values) if n1 == f2 and n1 == l3]
         else:
             if reverse_direction is False:
                 return self.redis_timeseries.range(key, time_from, time_to)
