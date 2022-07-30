@@ -94,3 +94,16 @@ module:name=timeseries,ver=999999,api=1,filters=0,usedby=[],using=[],options=[]
 * `nc -zv 10.104.71.60 6379`
 
 Stop and start the container to ensure redis, has installed correctly.
+
+## Backup (Redis)
+1. `CONFIG get dir` (in `redis-cli`) Tells where the dump file is located
+2. `SAVE`
+3. `/var/lib/redis` (should be `dump.rdb`)
+4. `sudo systemctl status redis-server`
+5. `sudo systemctl stop redis-server`
+6. `sudo cp /var/lib/redis/dump.rdb BACKUP-DIR`
+
+## Restore (Redis)
+1. `sudo systemctl stop redis-server`
+2. `sudo cp BACKUP-DIR /var/lib/redis/dump.rdb`
+3. `sudo systemctl start redis-server`
