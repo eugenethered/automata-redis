@@ -5,7 +5,6 @@ from core.options.exception.MissingOptionError import MissingOptionError
 from cache.holder.RedisCacheHolder import RedisCacheHolder
 from cache.provider.RedisCacheProvider import RedisCacheProvider
 from cache.provider.RedisCacheProviderWithHash import RedisCacheProviderWithHash
-from cache.provider.RedisCacheProviderWithTimeSeries import RedisCacheProviderWithTimeSeries
 
 
 class RedisCacheHolderTestCase(unittest.TestCase):
@@ -87,16 +86,6 @@ class RedisCacheHolderTestCase(unittest.TestCase):
         self.assertIsNotNone(cache_holder)
         self.assertIsInstance(cache_holder, RedisCacheProviderWithHash)
 
-    def test_should_instantiate_redis_cache_with_timeseries_provider(self):
-        options = {
-            'REDIS_SERVER_ADDRESS': '192.168.1.90',
-            'REDIS_SERVER_PORT': 6379,
-            'AUTO_CONNECT': False
-        }
-        cache_holder = RedisCacheHolder(options, RedisCacheProviderWithTimeSeries)
-        self.assertIsNotNone(cache_holder)
-        self.assertIsInstance(cache_holder, RedisCacheProviderWithTimeSeries)
-
     def test_should_access_relative_provider(self):
         options = {
             'REDIS_SERVER_ADDRESS': '192.168.1.90',
@@ -111,11 +100,6 @@ class RedisCacheHolderTestCase(unittest.TestCase):
         cache_holder = RedisCacheHolder(options, held_type=RedisCacheProviderWithHash)
         self.assertIsInstance(cache_holder, RedisCacheProviderWithHash)
         self.assertTrue(callable(getattr(cache_holder, 'values_store', None)), 'should have this method!')
-
-        RedisCacheHolder.re_initialize()
-        cache_holder = RedisCacheHolder(options, held_type=RedisCacheProviderWithTimeSeries)
-        self.assertIsInstance(cache_holder, RedisCacheProviderWithTimeSeries)
-        self.assertTrue(callable(getattr(cache_holder, 'fraction_key', None)), 'should have this method!')
 
 
 if __name__ == '__main__':

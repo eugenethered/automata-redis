@@ -3,9 +3,8 @@ from typing import TypeVar, Type
 
 from cache.provider.RedisCacheProvider import RedisCacheProvider
 from cache.provider.RedisCacheProviderWithHash import RedisCacheProviderWithHash
-from cache.provider.RedisCacheProviderWithTimeSeries import RedisCacheProviderWithTimeSeries
 
-T = TypeVar('T', RedisCacheProvider, RedisCacheProviderWithHash, RedisCacheProviderWithTimeSeries)
+T = TypeVar('T', RedisCacheProvider, RedisCacheProviderWithHash)
 
 
 # todo: nice, would be just RedisCacheHolder(Generic[T]) (IDE having trouble)
