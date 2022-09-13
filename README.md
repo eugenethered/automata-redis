@@ -59,3 +59,13 @@ Stop and start the container to ensure redis, has installed correctly.
 1. `sudo systemctl stop redis-server`
 2. `sudo cp BACKUP-DIR /var/lib/redis/dump.rdb`
 3. `sudo systemctl start redis-server`
+
+## Docker
+
+### Cache Docker Container (server)
+1. `docker start automata-data-db` (should start on port 6379)
+
+### Redis Tools Docker Container (client)
+1. `docker run --name redis-client --network automata-net -d --rm redis:7.0.4-alpine`
+2. `docker exec -it redis-client sh`
+3. `docker-cli -h automata-data-db` (inside the container)
