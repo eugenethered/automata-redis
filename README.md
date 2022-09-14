@@ -66,5 +66,5 @@ Stop and start the container to ensure redis, has installed correctly.
 * `docker start automata-data-db` (should start on port 6379)
 
 ### Redis Tools Docker Container (client)
-* `docker run --name redis-insight --network automata-net -d --rm -p 8001:8001 redislabs/redisinsight:latest`
+* `docker run --name redis-insight --network automata-net -d -p 8001:8001 redislabs/redisinsight:latest`
 
